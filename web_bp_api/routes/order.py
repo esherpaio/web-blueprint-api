@@ -6,7 +6,7 @@ from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
 from web.api.utils.cart import get_shipment_methods
 from web.api.utils.mollie import Mollie
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize, current_user
 from web.database import conn
 from web.database.model import (
@@ -61,7 +61,7 @@ class OrderAPI(API):
 #
 
 
-@api_v1_bp.post("/orders")
+@api_bp.post("/orders")
 def post_orders() -> Response:
     api = OrderAPI()
     data = api.gen_data(api.post_columns)
@@ -77,7 +77,7 @@ def post_orders() -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.patch("/orders/<int:order_id>")
+@api_bp.patch("/orders/<int:order_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_orders_id(order_id: int) -> Response:
     api = OrderAPI()
@@ -90,7 +90,7 @@ def patch_orders_id(order_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.delete("/orders/<int:order_id>")
+@api_bp.delete("/orders/<int:order_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_orders_id(order_id: int) -> Response:
     api = OrderAPI()

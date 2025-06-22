@@ -1,5 +1,5 @@
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Article, UserRoleLevel
@@ -16,7 +16,7 @@ from werkzeug import Response
 #
 
 
-@api_v1_bp.post("/articles")
+@api_bp.post("/articles")
 @authorize(UserRoleLevel.ADMIN)
 def post_articles() -> Response:
     name, _ = json_get("name", str, nullable=False)
@@ -38,7 +38,7 @@ def post_articles() -> Response:
     return json_response()
 
 
-@api_v1_bp.patch("/articles/<int:article_id>")
+@api_bp.patch("/articles/<int:article_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_articles_id(article_id: int) -> Response:
     attributes, has_attributes = json_get("attributes", dict, default={})
@@ -65,7 +65,7 @@ def patch_articles_id(article_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/articles/<int:article_id>")
+@api_bp.delete("/articles/<int:article_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_articles_id(article_id: int) -> Response:
     with conn.begin() as s:

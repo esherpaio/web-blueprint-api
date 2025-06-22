@@ -3,7 +3,7 @@ from decimal import Decimal
 from sqlalchemy import false, or_
 from sqlalchemy.orm import Session, joinedload
 from web.api import API, HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize, current_user
 from web.database import conn
 from web.database.model import (
@@ -43,7 +43,7 @@ class ShipmentMethodAPI(API):
 #
 
 
-@api_v1_bp.post("/shipment-methods")
+@api_bp.post("/shipment-methods")
 @authorize(UserRoleLevel.ADMIN)
 def post_shipment_methods() -> Response:
     class_id, _ = json_get("class_id", int, nullable=False)
@@ -66,7 +66,7 @@ def post_shipment_methods() -> Response:
     return json_response()
 
 
-@api_v1_bp.get("/shipment-methods")
+@api_bp.get("/shipment-methods")
 def get_shipment_methods() -> Response:
     api = ShipmentMethodAPI()
     data = api.gen_query_data(api.get_filters)
@@ -76,7 +76,7 @@ def get_shipment_methods() -> Response:
     return json_response(data=resources)
 
 
-@api_v1_bp.get("/shipment-methods/<int:shipment_method_id>")
+@api_bp.get("/shipment-methods/<int:shipment_method_id>")
 def get_shipment_methods_id(shipment_method_id: int) -> Response:
     api = ShipmentMethodAPI()
     with conn.begin() as s:
@@ -85,7 +85,7 @@ def get_shipment_methods_id(shipment_method_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.patch("/shipment-methods/<int:shipment_method_id>")
+@api_bp.patch("/shipment-methods/<int:shipment_method_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_shipment_methods_id(shipment_method_id: int) -> Response:
     name, has_name = json_get("name", str)
@@ -111,7 +111,7 @@ def patch_shipment_methods_id(shipment_method_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/shipment-methods/<int:shipment_method_id>")
+@api_bp.delete("/shipment-methods/<int:shipment_method_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_shipment_methods_id(shipment_method_id: int) -> Response:
     with conn.begin() as s:

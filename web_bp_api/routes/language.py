@@ -1,5 +1,5 @@
 from web.api import API, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Language, UserRoleLevel
@@ -29,7 +29,7 @@ class LanguageAPI(API):
 #
 
 
-@api_v1_bp.post("/languages")
+@api_bp.post("/languages")
 @authorize(UserRoleLevel.ADMIN)
 def post_languages() -> Response:
     api = LanguageAPI()
@@ -41,7 +41,7 @@ def post_languages() -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.get("/languages")
+@api_bp.get("/languages")
 def get_languages() -> Response:
     api = LanguageAPI()
     with conn.begin() as s:
@@ -50,7 +50,7 @@ def get_languages() -> Response:
     return json_response(data=resources)
 
 
-@api_v1_bp.get("/languages/<int:language_id>")
+@api_bp.get("/languages/<int:language_id>")
 def get_languages_id(language_id: int) -> Response:
     api = LanguageAPI()
     with conn.begin() as s:
@@ -59,7 +59,7 @@ def get_languages_id(language_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.delete("/languages/<int:language_id>")
+@api_bp.delete("/languages/<int:language_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_languages_id(language_id: int) -> Response:
     api = LanguageAPI()

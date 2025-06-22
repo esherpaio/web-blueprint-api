@@ -1,5 +1,5 @@
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Order, OrderStatusId, Shipment, UserRoleLevel
@@ -17,7 +17,7 @@ from werkzeug import Response
 #
 
 
-@api_v1_bp.post("/orders/<int:order_id>/shipments")
+@api_bp.post("/orders/<int:order_id>/shipments")
 @authorize(UserRoleLevel.ADMIN)
 def post_orders_id_shipments(order_id: int) -> Response:
     url, _ = json_get("url", str, nullable=False)

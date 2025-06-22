@@ -1,6 +1,6 @@
 from web.config import config
 
-from ._bp import webhook_v1_bp
+from ._bp import webhook_bp
 from .routes import mollie
 
 if config.INTIME:
@@ -10,5 +10,5 @@ if config.INTIME:
 __all__ = [
     "intime",
     "mollie",
-    "webhook_v1_bp",
+    "webhook_bp",
 ]

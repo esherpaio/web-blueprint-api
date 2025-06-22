@@ -3,7 +3,7 @@ from enum import StrEnum
 from flask import abort
 from sqlalchemy.orm.session import Session
 from web.api import API, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.database import conn
 from web.database.model import Verification
 from web.i18n import _
@@ -35,7 +35,7 @@ class VerificationAPI(API):
 #
 
 
-@api_v1_bp.get("/verifications")
+@api_bp.get("/verifications")
 def get_verifications() -> Response:
     api = VerificationAPI()
     data = api.gen_query_data(api.get_filters)

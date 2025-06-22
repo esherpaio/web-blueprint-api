@@ -1,5 +1,5 @@
 from web.api import API, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Country, UserRoleLevel
@@ -38,7 +38,7 @@ class CountryAPI(API):
 #
 
 
-@api_v1_bp.post("/countries")
+@api_bp.post("/countries")
 @authorize(UserRoleLevel.ADMIN)
 def post_countries() -> Response:
     api = CountryAPI()
@@ -50,7 +50,7 @@ def post_countries() -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.get("/countries")
+@api_bp.get("/countries")
 def get_countries() -> Response:
     api = CountryAPI()
     with conn.begin() as s:
@@ -59,7 +59,7 @@ def get_countries() -> Response:
     return json_response(data=resources)
 
 
-@api_v1_bp.get("/countries/<int:country_id>")
+@api_bp.get("/countries/<int:country_id>")
 def get_countries_id(country_id: int) -> Response:
     api = CountryAPI()
     with conn.begin() as s:
@@ -68,7 +68,7 @@ def get_countries_id(country_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.patch("/countries/<int:country_id>")
+@api_bp.patch("/countries/<int:country_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_countries_id(country_id: int) -> Response:
     api = CountryAPI()
@@ -80,7 +80,7 @@ def patch_countries_id(country_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.delete("/countries/<int:country_id>")
+@api_bp.delete("/countries/<int:country_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_countries_id(country_id: int) -> Response:
     api = CountryAPI()

@@ -4,13 +4,15 @@ import re
 from flask import request
 from web import cdn
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.config import config
 from web.database import conn
 from web.database.model import Article, ArticleMedia, File, FileTypeId, UserRoleLevel
 from werkzeug import Response
 from werkzeug.utils import secure_filename
+
+from web_bp_api import api_bp
 
 #
 # Configuration
@@ -22,7 +24,7 @@ from werkzeug.utils import secure_filename
 #
 
 
-@api_v1_bp.post("/articles/<int:article_id>/media")
+@api_bp.post("/articles/<int:article_id>/media")
 @authorize(UserRoleLevel.ADMIN)
 def post_articles_id_media(article_id: int) -> Response:
     with conn.begin() as s:
@@ -82,7 +84,7 @@ def post_articles_id_media(article_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.patch("/articles/<int:article_id>/media/<int:media_id>")
+@api_bp.patch("/articles/<int:article_id>/media/<int:media_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_articles_id_media_id(article_id: int, media_id: int) -> Response:
     description, has_description = json_get("description", str)
@@ -108,7 +110,7 @@ def patch_articles_id_media_id(article_id: int, media_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/articles/<int:article_id>/media/<int:media_id>")
+@api_bp.delete("/articles/<int:article_id>/media/<int:media_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_articles_id_media_id(article_id: int, media_id: int) -> Response:
     with conn.begin() as s:

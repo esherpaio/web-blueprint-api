@@ -2,7 +2,7 @@ import uuid
 from enum import StrEnum
 
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.app.urls import parse_url, url_for
 from web.config import config
 from web.database import conn
@@ -28,7 +28,7 @@ class Text(StrEnum):
 #
 
 
-@api_v1_bp.post("/users/<int:user_id>/activation")
+@api_bp.post("/users/<int:user_id>/activation")
 def post_users_id_activation(user_id: int) -> Response:
     with conn.begin() as s:
         # Get user
@@ -59,7 +59,7 @@ def post_users_id_activation(user_id: int) -> Response:
     return json_response(200, message=Text.ACTIVATION_CHECK)
 
 
-@api_v1_bp.patch("/users/<int:user_id>/activation")
+@api_bp.patch("/users/<int:user_id>/activation")
 def patch_users_id_activation(user_id: int) -> Response:
     verification_key, _ = json_get("verification_key", str)
 

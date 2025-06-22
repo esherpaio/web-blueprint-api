@@ -4,14 +4,14 @@ from werkzeug import Response
 
 from web.api import HttpText, json_response
 from web.api.utils.mollie import Mollie
-from web.app.blueprint.webhook_v1 import webhook_v1_bp
+from web_bp_webhook import webhook_bp
 from web.database import conn
 from web.database.model import Invoice, Order, OrderStatusId
 from web.mail import mail
 from web.mail.enum import MailEvent
 
 
-@webhook_v1_bp.post("/mollie/payment")
+@webhook_bp.post("/mollie/payment")
 def mollie_payment() -> Response:
     """Mollie payment webhook.
 

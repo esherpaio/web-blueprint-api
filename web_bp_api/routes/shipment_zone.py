@@ -1,5 +1,5 @@
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import ShipmentMethod, ShipmentZone, UserRoleLevel
@@ -15,7 +15,7 @@ from werkzeug import Response
 #
 
 
-@api_v1_bp.post("/shipment-zones")
+@api_bp.post("/shipment-zones")
 @authorize(UserRoleLevel.ADMIN)
 def post_shipment_zones() -> Response:
     country_id, _ = json_get("country_id", int)
@@ -50,7 +50,7 @@ def post_shipment_zones() -> Response:
     return json_response()
 
 
-@api_v1_bp.patch("/shipment-zones/<int:shipment_zone_id>")
+@api_bp.patch("/shipment-zones/<int:shipment_zone_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_shipment_zones_id(shipment_zone_id: int) -> Response:
     country_id, has_country_id = json_get("country_id", int)
@@ -74,7 +74,7 @@ def patch_shipment_zones_id(shipment_zone_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/shipment-zones/<int:shipment_zone_id>")
+@api_bp.delete("/shipment-zones/<int:shipment_zone_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_shipment_zones_id(shipment_zone_id: int) -> Response:
     with conn.begin() as s:

@@ -4,7 +4,7 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 from web.api import json_get, json_response
 from web.api.utils.cart import transfer_cart
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import jwt_login, jwt_logout
 from web.config import config
 from web.database import conn
@@ -32,7 +32,7 @@ class Text(StrEnum):
 #
 
 
-@api_v1_bp.post("/sessions")
+@api_bp.post("/sessions")
 @transfer_cart
 def post_sessions() -> Response:
     email, _ = json_get("email", str, nullable=False)
@@ -60,14 +60,14 @@ def post_sessions() -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/sessions")
+@api_bp.delete("/sessions")
 def delete_sessions() -> Response:
     # Logout user
     jwt_logout()
     return json_response()
 
 
-@api_v1_bp.post("/sessions/google")
+@api_bp.post("/sessions/google")
 @transfer_cart
 def post_sessions_google() -> Response:
     token_id, _ = json_get("token_id", str, nullable=False)

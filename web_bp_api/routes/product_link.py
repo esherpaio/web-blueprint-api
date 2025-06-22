@@ -1,5 +1,5 @@
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import ProductLink, UserRoleLevel
@@ -15,7 +15,7 @@ from werkzeug import Response
 #
 
 
-@api_v1_bp.post("/products/<int:product_id>/links")
+@api_bp.post("/products/<int:product_id>/links")
 @authorize(UserRoleLevel.ADMIN)
 def post_products_id_links(product_id: int) -> Response:
     sku_id, _ = json_get("sku_id", int, nullable=False)
@@ -44,7 +44,7 @@ def post_products_id_links(product_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/products/<int:product_id>/links/<int:link_id>")
+@api_bp.delete("/products/<int:product_id>/links/<int:link_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_products_id_links_id(product_id: int, link_id: int) -> Response:
     with conn.begin() as s:

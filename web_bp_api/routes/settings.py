@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 from web.api import API, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import AppSettings, UserRoleLevel
@@ -30,7 +30,7 @@ class SettingsAPI(API):
 #
 
 
-@api_v1_bp.get("/settings")
+@api_bp.get("/settings")
 @authorize(UserRoleLevel.ADMIN)
 def get_settings() -> Response:
     api = SettingsAPI()
@@ -40,7 +40,7 @@ def get_settings() -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.patch("/settings")
+@api_bp.patch("/settings")
 @authorize(UserRoleLevel.ADMIN)
 def patch_settings() -> Response:
     api = SettingsAPI()

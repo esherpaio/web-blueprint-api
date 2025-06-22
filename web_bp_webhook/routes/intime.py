@@ -5,7 +5,7 @@ from sqlalchemy.orm import joinedload
 from werkzeug import Response
 
 from web.api import JsonEncoder, json_get
-from web.app.blueprint.webhook_v1 import webhook_v1_bp
+from web_bp_webhook import webhook_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import (
@@ -42,7 +42,7 @@ def response(code: int = 200, data: list | dict | None = None) -> Response:
 #
 
 
-@webhook_v1_bp.get("/intime/products/count")
+@webhook_bp.get("/intime/products/count")
 @authorize(UserRoleLevel.EXTERNAL)
 def intime_products_count() -> Response:
     with conn.begin() as s:
@@ -50,7 +50,7 @@ def intime_products_count() -> Response:
     return response(data={"count": count})
 
 
-@webhook_v1_bp.get("/intime/products/list")
+@webhook_bp.get("/intime/products/list")
 @authorize(UserRoleLevel.EXTERNAL)
 def intime_products_list() -> Response:
     products = []
@@ -75,7 +75,7 @@ def intime_products_list() -> Response:
     return response(data={"products": products})
 
 
-@webhook_v1_bp.get("/intime/products/<string:sku_number>/stock")
+@webhook_bp.get("/intime/products/<string:sku_number>/stock")
 @authorize(UserRoleLevel.EXTERNAL)
 def intime_products_id_stock(sku_number: str) -> Response:
     with conn.begin() as s:
@@ -85,7 +85,7 @@ def intime_products_id_stock(sku_number: str) -> Response:
     return response(data={"count": sku.stock})
 
 
-@webhook_v1_bp.post("/intime/products/<string:sku_number>/update-stock")
+@webhook_bp.post("/intime/products/<string:sku_number>/update-stock")
 @authorize(UserRoleLevel.EXTERNAL)
 def intime_products_id(sku_number: str) -> Response:
     stock, _ = json_get("count", type_=int, nullable=False)
@@ -98,7 +98,7 @@ def intime_products_id(sku_number: str) -> Response:
     return response(data={"hasUpdated": has_updated})
 
 
-@webhook_v1_bp.get("/intime/open-orders/count")
+@webhook_bp.get("/intime/open-orders/count")
 @authorize(UserRoleLevel.EXTERNAL)
 def intime_open_orders_count() -> Response:
     with conn.begin() as s:
@@ -106,7 +106,7 @@ def intime_open_orders_count() -> Response:
     return response(data={"count": count})
 
 
-@webhook_v1_bp.get("/intime/open-orders/list")
+@webhook_bp.get("/intime/open-orders/list")
 @authorize(UserRoleLevel.EXTERNAL)
 def intime_open_orders_list() -> Response:
     open_orders = []
@@ -161,7 +161,7 @@ def intime_open_orders_list() -> Response:
     return response(data={"openOrders": open_orders})
 
 
-@webhook_v1_bp.post("/intime/orders/<string:order_id>/update-tracking")
+@webhook_bp.post("/intime/orders/<string:order_id>/update-tracking")
 @authorize(UserRoleLevel.EXTERNAL)
 def intime_orders_id_update_tracking(order_id: str) -> Response:
     # Parse request
@@ -209,7 +209,7 @@ def intime_orders_id_update_tracking(order_id: str) -> Response:
     return response(data={"hasUpdated": has_updated})
 
 
-@webhook_v1_bp.post("/intime/orders/<string:order_id>/fulfill")
+@webhook_bp.post("/intime/orders/<string:order_id>/fulfill")
 @authorize(UserRoleLevel.EXTERNAL)
 def intime_orders_id_fulfill(order_id: str) -> Response:
     with conn.begin() as s:

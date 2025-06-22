@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Coupon, UserRoleLevel
@@ -17,7 +17,7 @@ from werkzeug import Response
 #
 
 
-@api_v1_bp.post("/coupons")
+@api_bp.post("/coupons")
 @authorize(UserRoleLevel.ADMIN)
 def post_coupons() -> Response:
     amount, _ = json_get("amount", Decimal)
@@ -38,7 +38,7 @@ def post_coupons() -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/coupons/<int:coupon_id>")
+@api_bp.delete("/coupons/<int:coupon_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_coupons_id(coupon_id: int) -> Response:
     with conn.begin() as s:

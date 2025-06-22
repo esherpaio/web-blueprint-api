@@ -1,5 +1,5 @@
 from web.api import API, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Currency, UserRoleLevel
@@ -30,7 +30,7 @@ class CurrencyAPI(API):
 #
 
 
-@api_v1_bp.post("/currencies")
+@api_bp.post("/currencies")
 @authorize(UserRoleLevel.ADMIN)
 def post_currencies() -> Response:
     api = CurrencyAPI()
@@ -42,7 +42,7 @@ def post_currencies() -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.get("/currencies")
+@api_bp.get("/currencies")
 def get_currencies() -> Response:
     api = CurrencyAPI()
     with conn.begin() as s:
@@ -51,7 +51,7 @@ def get_currencies() -> Response:
     return json_response(data=resources)
 
 
-@api_v1_bp.get("/currencies/<int:currency_id>")
+@api_bp.get("/currencies/<int:currency_id>")
 def get_currencies_id(currency_id: int) -> Response:
     api = CurrencyAPI()
     with conn.begin() as s:
@@ -60,7 +60,7 @@ def get_currencies_id(currency_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.delete("/currencies/<int:currency_id>")
+@api_bp.delete("/currencies/<int:currency_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_currencies_id(currency_id: int) -> Response:
     api = CurrencyAPI()

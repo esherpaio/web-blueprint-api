@@ -1,5 +1,5 @@
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import CategoryItem, UserRoleLevel
@@ -15,7 +15,7 @@ from werkzeug import Response
 #
 
 
-@api_v1_bp.post("/categories/<int:category_id>/items")
+@api_bp.post("/categories/<int:category_id>/items")
 @authorize(UserRoleLevel.ADMIN)
 def post_categories_id_items(category_id: int) -> Response:
     order, _ = json_get("order", int)
@@ -44,7 +44,7 @@ def post_categories_id_items(category_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.patch("/categories/<int:category_id>/items/<int:item_id>")
+@api_bp.patch("/categories/<int:category_id>/items/<int:item_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_categories_id_items_id(category_id: int, item_id: int) -> Response:
     order, has_order = json_get("order", int)
@@ -64,7 +64,7 @@ def patch_categories_id_items_id(category_id: int, item_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/categories/<int:category_id>/items/<int:item_id>")
+@api_bp.delete("/categories/<int:category_id>/items/<int:item_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_categories_id_items_id(category_id: int, item_id: int) -> Response:
     with conn.begin() as s:

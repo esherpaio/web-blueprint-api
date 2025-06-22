@@ -4,7 +4,7 @@ import re
 from flask import request
 from web import cdn
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.config import config
 from web.database import conn
@@ -22,7 +22,7 @@ from werkzeug.utils import secure_filename
 #
 
 
-@api_v1_bp.post("/products/<int:product_id>/media")
+@api_bp.post("/products/<int:product_id>/media")
 @authorize(UserRoleLevel.ADMIN)
 def post_products_id_media(product_id: int) -> Response:
     with conn.begin() as s:
@@ -83,7 +83,7 @@ def post_products_id_media(product_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.patch("/products/<int:product_id>/media/<int:media_id>")
+@api_bp.patch("/products/<int:product_id>/media/<int:media_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_products_id_media_id(product_id: int, media_id: int) -> Response:
     description, has_description = json_get("description", str)
@@ -109,7 +109,7 @@ def patch_products_id_media_id(product_id: int, media_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/products/<int:product_id>/media/<int:media_id>")
+@api_bp.delete("/products/<int:product_id>/media/<int:media_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_products_id_media_id(product_id: int, media_id) -> Response:
     with conn.begin() as s:

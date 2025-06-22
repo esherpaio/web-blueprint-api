@@ -4,7 +4,7 @@ from enum import StrEnum
 from mollie.api.error import UnprocessableEntityError
 from web.api import HttpText, json_get, json_response
 from web.api.utils.mollie import Mollie
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import Invoice, Order
@@ -28,7 +28,7 @@ class Text(StrEnum):
 #
 
 
-@api_v1_bp.post("/orders/<int:order_id>/payments")
+@api_bp.post("/orders/<int:order_id>/payments")
 def post_orders_id_payments(order_id: int) -> Response:
     redirect_url = json_get("redirect_url", str, nullable=False)[0]
     cancel_url = json_get("cancel_url", str, nullable=False)[0]

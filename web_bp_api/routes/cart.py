@@ -7,7 +7,7 @@ from sqlalchemy.orm.util import has_identity
 from web.api import API, HttpText, json_response
 from web.api.utils.cart import get_shipment_methods
 from web.api.utils.vat import get_vat
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import Billing, Cart, Coupon, Shipping
@@ -60,7 +60,7 @@ class CartAPI(API):
 #
 
 
-@api_v1_bp.post("/carts")
+@api_bp.post("/carts")
 def post_carts() -> Response:
     api = CartAPI()
     data: dict[str, Any] = {}
@@ -73,7 +73,7 @@ def post_carts() -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.get("/carts")
+@api_bp.get("/carts")
 def get_carts() -> Response:
     api = CartAPI()
     with conn.begin() as s:
@@ -83,7 +83,7 @@ def get_carts() -> Response:
     return json_response(data=resources)
 
 
-@api_v1_bp.get("/carts/<int:cart_id>")
+@api_bp.get("/carts/<int:cart_id>")
 def get_carts_id(cart_id: int) -> Response:
     api = CartAPI()
     with conn.begin() as s:
@@ -93,7 +93,7 @@ def get_carts_id(cart_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.patch("/carts/<int:cart_id>")
+@api_bp.patch("/carts/<int:cart_id>")
 def patch_carts_id(cart_id: int) -> Response:
     api = CartAPI()
     data = api.gen_data(api.patch_columns)
@@ -108,7 +108,7 @@ def patch_carts_id(cart_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.delete("/carts/<int:cart_id>")
+@api_bp.delete("/carts/<int:cart_id>")
 def delete_carts_id(cart_id: int) -> Response:
     api = CartAPI()
     with conn.begin() as s:

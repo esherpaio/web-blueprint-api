@@ -2,7 +2,7 @@ from enum import StrEnum
 
 from sqlalchemy import null, true
 from web.api import json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.config import config
 from web.database import conn
 from web.database.model import User
@@ -29,7 +29,7 @@ class Text(StrEnum):
 #
 
 
-@api_v1_bp.post("/emails")
+@api_bp.post("/emails")
 def post_emails() -> Response:
     event_id, _ = json_get("event_id", str)
     data, _ = json_get("data", dict, default={})

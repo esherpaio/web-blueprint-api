@@ -3,7 +3,7 @@ from enum import StrEnum
 
 from sqlalchemy.orm import Session
 from web.api import HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.app.urls import parse_url, url_for
 from web.config import config
 from web.database import conn
@@ -32,7 +32,7 @@ class Text(StrEnum):
 #
 
 
-@api_v1_bp.post("/users/<int:user_id>/password")
+@api_bp.post("/users/<int:user_id>/password")
 def post_users_id_password(user_id: int) -> Response:
     with conn.begin() as s:
         # Get user
@@ -46,7 +46,7 @@ def post_users_id_password(user_id: int) -> Response:
     return json_response(200, Text.PASSWORD_REQUEST_SEND)
 
 
-@api_v1_bp.patch("/users/<int:user_id>/password")
+@api_bp.patch("/users/<int:user_id>/password")
 def patch_users_id_password(user_id: int) -> Response:
     password, _ = json_get("password", str)
     password_eval, _ = json_get("password_eval", str)

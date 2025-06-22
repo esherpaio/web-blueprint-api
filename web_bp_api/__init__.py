@@ -1,4 +1,4 @@
-from ._bp import api_v1_bp
+from ._bp import api_bp
 from .routes import (
     article,
     article_media,
@@ -37,7 +37,7 @@ from .routes import (
 )
 
 __all__ = [
-    "api_v1_bp",
+    "api_bp",
     "article_media",
     "article",
     "billing",

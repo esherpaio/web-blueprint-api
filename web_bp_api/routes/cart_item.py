@@ -4,7 +4,7 @@ from flask import abort
 from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
 from web.api.utils.cart import get_shipment_methods
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import Cart, CartItem
@@ -46,7 +46,7 @@ class CartItemAPI(API):
 #
 
 
-@api_v1_bp.post("/carts/<int:cart_id>/items")
+@api_bp.post("/carts/<int:cart_id>/items")
 def post_carts_id_items(cart_id: int) -> Response:
     api = CartItemAPI()
     data = api.gen_data(api.post_columns)
@@ -57,7 +57,7 @@ def post_carts_id_items(cart_id: int) -> Response:
     return json_response(message=Text.CART_ITEM_ADDED, data=resource)
 
 
-@api_v1_bp.get("/carts/<int:cart_id>/items")
+@api_bp.get("/carts/<int:cart_id>/items")
 def get_carts_id_items(cart_id: int) -> Response:
     api = CartItemAPI()
     data = api.gen_path_data()
@@ -69,7 +69,7 @@ def get_carts_id_items(cart_id: int) -> Response:
     return json_response(data=resources)
 
 
-@api_v1_bp.patch("/carts/<int:cart_id>/items/<int:cart_item_id>")
+@api_bp.patch("/carts/<int:cart_id>/items/<int:cart_item_id>")
 def patch_cart_id_items_id(cart_id: int, cart_item_id: int) -> Response:
     api = CartItemAPI()
     data = api.gen_data(api.patch_columns)
@@ -83,7 +83,7 @@ def patch_cart_id_items_id(cart_id: int, cart_item_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.delete("/carts/<int:cart_id>/items/<int:cart_item_id>")
+@api_bp.delete("/carts/<int:cart_id>/items/<int:cart_item_id>")
 def delete_cart_id_items_id(cart_id: int, cart_item_id: int) -> Response:
     api = CartItemAPI()
     data = api.gen_path_data()

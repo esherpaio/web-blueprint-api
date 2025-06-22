@@ -1,5 +1,5 @@
 from web.api import API, HttpText, json_get, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import (
@@ -37,7 +37,7 @@ class SkuAPI(API):
 #
 
 
-@api_v1_bp.patch("/skus/<int:sku_id>")
+@api_bp.patch("/skus/<int:sku_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_skus_id(sku_id: int) -> Response:
     attributes, has_attributes = json_get("attributes", dict, default={})
@@ -64,7 +64,7 @@ def patch_skus_id(sku_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.get("/skus")
+@api_bp.get("/skus")
 @authorize(UserRoleLevel.ADMIN)
 def get_skus() -> Response:
     api = SkuAPI()
@@ -76,7 +76,7 @@ def get_skus() -> Response:
     return json_response(data=resources)
 
 
-@api_v1_bp.delete("/skus/<int:sku_id>")
+@api_bp.delete("/skus/<int:sku_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_skus_id(sku_id: int) -> Response:
     with conn.begin() as s:

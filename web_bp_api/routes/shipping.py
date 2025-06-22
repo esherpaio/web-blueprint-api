@@ -1,7 +1,7 @@
 from flask import abort
 from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import Cart, Order, Shipping
@@ -61,7 +61,7 @@ class ShippingAPI(API):
 #
 
 
-@api_v1_bp.post("/shippings")
+@api_bp.post("/shippings")
 def post_shippings() -> Response:
     api = ShippingAPI()
     data = api.gen_data(api.post_columns)
@@ -73,7 +73,7 @@ def post_shippings() -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.get("/shippings/<int:shipping_id>")
+@api_bp.get("/shippings/<int:shipping_id>")
 def get_shippings_id(shipping_id: int) -> Response:
     api = ShippingAPI()
     with conn.begin() as s:
@@ -83,7 +83,7 @@ def get_shippings_id(shipping_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.patch("/shippings/<int:shipping_id>")
+@api_bp.patch("/shippings/<int:shipping_id>")
 def patch_shippings_id(shipping_id: int) -> Response:
     api = ShippingAPI()
     data = api.gen_data(api.patch_columns)

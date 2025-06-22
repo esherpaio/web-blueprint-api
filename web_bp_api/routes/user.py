@@ -4,7 +4,7 @@ from flask import abort
 from sqlalchemy import true
 from sqlalchemy.orm.session import Session
 from web.api import API, json_response
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import User, UserRoleId
@@ -61,7 +61,7 @@ class UserAPI(API):
 #
 
 
-@api_v1_bp.post("/users")
+@api_bp.post("/users")
 def post_users() -> Response:
     api = UserAPI()
     data = api.gen_data(api.post_columns)
@@ -75,7 +75,7 @@ def post_users() -> Response:
     return json_response(message=Text.USER_CREATED, data=resource)
 
 
-@api_v1_bp.get("/users")
+@api_bp.get("/users")
 def get_users() -> Response:
     api = UserAPI()
     data = api.gen_query_data(api.get_filters)
@@ -86,7 +86,7 @@ def get_users() -> Response:
     return json_response(data=resources)
 
 
-@api_v1_bp.get("/users/<int:user_id>")
+@api_bp.get("/users/<int:user_id>")
 def get_users_id(user_id: int) -> Response:
     api = UserAPI()
     with conn.begin() as s:
@@ -96,7 +96,7 @@ def get_users_id(user_id: int) -> Response:
     return json_response(data=resource)
 
 
-@api_v1_bp.patch("/users/<int:user_id>")
+@api_bp.patch("/users/<int:user_id>")
 def patch_users_id(user_id: int) -> Response:
     api = UserAPI()
     data = api.gen_data(api.patch_columns)

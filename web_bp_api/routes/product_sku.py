@@ -2,7 +2,7 @@ import itertools
 
 from web.api import HttpText, json_response
 from web.api.utils.sku import get_sku_unit_price
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Product, ProductValue, Sku, SkuDetail, UserRoleLevel
@@ -20,7 +20,7 @@ from werkzeug import Response
 #
 
 
-@api_v1_bp.post("/products/<int:product_id>/skus")
+@api_bp.post("/products/<int:product_id>/skus")
 @authorize(UserRoleLevel.ADMIN)
 def post_skus(product_id: int) -> Response:
     with conn.begin() as s:

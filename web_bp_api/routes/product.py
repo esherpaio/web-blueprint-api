@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from web.api import HttpText, json_get, json_response
 from web.api.utils.sku import set_sku_unit_prices
-from web.app.blueprint.api_v1 import api_v1_bp
+from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import CategoryItem, Product, ProductTypeId, Sku, UserRoleLevel
@@ -19,7 +19,7 @@ from werkzeug import Response
 #
 
 
-@api_v1_bp.post("/products")
+@api_bp.post("/products")
 @authorize(UserRoleLevel.ADMIN)
 def post_products() -> Response:
     name, _ = json_get("name", str, nullable=False)
@@ -45,7 +45,7 @@ def post_products() -> Response:
     return json_response()
 
 
-@api_v1_bp.patch("/products/<int:product_id>")
+@api_bp.patch("/products/<int:product_id>")
 @authorize(UserRoleLevel.ADMIN)
 def patch_products_id(product_id: int) -> Response:
     attributes, has_attributes = json_get("attributes", dict, default={})
@@ -82,7 +82,7 @@ def patch_products_id(product_id: int) -> Response:
     return json_response()
 
 
-@api_v1_bp.delete("/products/<int:product_id>")
+@api_bp.delete("/products/<int:product_id>")
 @authorize(UserRoleLevel.ADMIN)
 def delete_products_id(product_id: int) -> Response:
     with conn.begin() as s:
