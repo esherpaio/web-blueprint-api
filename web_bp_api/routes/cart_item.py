@@ -4,13 +4,14 @@ from flask import abort
 from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
 from web.api.utils.cart import get_shipment_methods
-from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import Cart, CartItem
 from web.i18n import _
 from web.utils import none_attrgetter
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

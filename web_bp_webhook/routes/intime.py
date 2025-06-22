@@ -2,10 +2,7 @@ import json
 
 from sqlalchemy import false, null
 from sqlalchemy.orm import joinedload
-from werkzeug import Response
-
 from web.api import JsonEncoder, json_get
-from web_bp_webhook import webhook_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import (
@@ -19,6 +16,9 @@ from web.database.model import (
 )
 from web.mail import mail
 from web.mail.enum import MailEvent
+from werkzeug import Response
+
+from web_bp_webhook import webhook_bp
 
 #
 # Helpers

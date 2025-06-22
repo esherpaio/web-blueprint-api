@@ -1,10 +1,11 @@
 from web.api import HttpText, json_get, json_response
-from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Category, UserRoleLevel
 from web.utils.generators import gen_slug
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

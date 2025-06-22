@@ -2,12 +2,13 @@ from decimal import Decimal
 
 from web.api import HttpText, json_get, json_response
 from web.api.utils.sku import set_sku_unit_prices
-from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import CategoryItem, Product, ProductTypeId, Sku, UserRoleLevel
 from web.utils.generators import gen_slug
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

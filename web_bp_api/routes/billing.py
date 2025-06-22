@@ -1,11 +1,12 @@
 from flask import abort
 from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
-from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import Billing, Cart, Order
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 from .cart import set_shipment, set_vat
 

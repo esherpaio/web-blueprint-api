@@ -4,7 +4,6 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 from web.api import json_get, json_response
 from web.api.utils.cart import transfer_cart
-from web_bp_api import api_bp
 from web.auth import jwt_login, jwt_logout
 from web.config import config
 from web.database import conn
@@ -12,6 +11,8 @@ from web.database.model import User, UserRoleId
 from web.i18n import _
 from werkzeug import Response
 from werkzeug.security import check_password_hash
+
+from web_bp_api import api_bp
 
 from .user_password import recover_user_password
 

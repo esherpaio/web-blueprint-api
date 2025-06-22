@@ -3,7 +3,6 @@ from enum import StrEnum
 
 from web.api import HttpText, json_get, json_response
 from web.api.utils.mollie import Mollie
-from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Order, Refund, UserRoleLevel
@@ -11,6 +10,8 @@ from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

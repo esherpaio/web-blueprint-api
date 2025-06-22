@@ -6,7 +6,6 @@ from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
 from web.api.utils.cart import get_shipment_methods
 from web.api.utils.mollie import Mollie
-from web_bp_api import api_bp
 from web.auth import authorize, current_user
 from web.database import conn
 from web.database.model import (
@@ -24,6 +23,8 @@ from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

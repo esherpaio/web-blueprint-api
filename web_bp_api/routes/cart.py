@@ -7,13 +7,14 @@ from sqlalchemy.orm.util import has_identity
 from web.api import API, HttpText, json_response
 from web.api.utils.cart import get_shipment_methods
 from web.api.utils.vat import get_vat
-from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import Billing, Cart, Coupon, Shipping
 from web.locale import current_locale
 from web.utils import none_attrgetter
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

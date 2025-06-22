@@ -23,5 +23,7 @@ setup(
     install_requires=find_requirements(),
     include_package_data=True,
     package_data={"": DATA},
-    packages=find_packages(include=["web_bp_api", "web_bp_api.*", "web_bp_webhook", "web_bp_webhook.*"]),
+    packages=find_packages(
+        include=["web_bp_api", "web_bp_api.*", "web_bp_webhook", "web_bp_webhook.*"]
+    ),
 )

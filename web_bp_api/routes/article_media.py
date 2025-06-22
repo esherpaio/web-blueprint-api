@@ -4,7 +4,6 @@ import re
 from flask import request
 from web import cdn
 from web.api import HttpText, json_get, json_response
-from web_bp_api import api_bp
 from web.auth import authorize
 from web.config import config
 from web.database import conn

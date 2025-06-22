@@ -2,7 +2,6 @@ from enum import StrEnum
 
 from sqlalchemy import null, true
 from web.api import json_get, json_response
-from web_bp_api import api_bp
 from web.config import config
 from web.database import conn
 from web.database.model import User
@@ -10,6 +9,8 @@ from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

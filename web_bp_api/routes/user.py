@@ -4,7 +4,6 @@ from flask import abort
 from sqlalchemy import true
 from sqlalchemy.orm.session import Session
 from web.api import API, json_response
-from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import User, UserRoleId
@@ -12,6 +11,8 @@ from web.i18n import _
 from web.utils.validation import is_email
 from werkzeug import Response
 from werkzeug.security import generate_password_hash
+
+from web_bp_api import api_bp
 
 #
 # Configuration

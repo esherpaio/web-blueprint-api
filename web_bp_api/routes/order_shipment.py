@@ -1,11 +1,12 @@
 from web.api import HttpText, json_get, json_response
-from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Order, OrderStatusId, Shipment, UserRoleLevel
 from web.mail.enum import MailEvent
 from web.mail.mail import mail
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

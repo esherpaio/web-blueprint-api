@@ -4,13 +4,14 @@ from enum import StrEnum
 from mollie.api.error import UnprocessableEntityError
 from web.api import HttpText, json_get, json_response
 from web.api.utils.mollie import Mollie
-from web_bp_api import api_bp
 from web.auth import current_user
 from web.database import conn
 from web.database.model import Invoice, Order
 from web.i18n import _
 from web.locale import current_locale
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

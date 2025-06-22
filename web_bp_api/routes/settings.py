@@ -2,11 +2,12 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 from web.api import API, json_response
-from web_bp_api import api_bp
 from web.auth import authorize
 from web.database import conn
 from web.database.model import AppSettings, UserRoleLevel
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration

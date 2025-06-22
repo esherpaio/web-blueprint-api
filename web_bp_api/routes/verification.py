@@ -3,11 +3,12 @@ from enum import StrEnum
 from flask import abort
 from sqlalchemy.orm.session import Session
 from web.api import API, json_response
-from web_bp_api import api_bp
 from web.database import conn
 from web.database.model import Verification
 from web.i18n import _
 from werkzeug import Response
+
+from web_bp_api import api_bp
 
 #
 # Configuration
