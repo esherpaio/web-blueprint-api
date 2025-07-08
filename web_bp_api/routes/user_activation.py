@@ -3,12 +3,12 @@ from enum import StrEnum
 
 from web.api import HttpText, json_get, json_response
 from web.app.urls import parse_url, url_for
-from web.config import config
 from web.database import conn
 from web.database.model import User, Verification
 from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
+from web.setup import config
 from werkzeug import Response
 
 from web_bp_api import api_bp

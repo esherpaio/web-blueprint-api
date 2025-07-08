@@ -2,12 +2,12 @@ from enum import StrEnum
 
 from sqlalchemy import null, true
 from web.api import json_get, json_response
-from web.config import config
 from web.database import conn
 from web.database.model import User
 from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
+from web.setup import config
 from werkzeug import Response
 
 from web_bp_api import api_bp
@@ -21,7 +21,7 @@ class Text(StrEnum):
     CONTACT_SUCCESS = _("API_MAIL_CONTACT_SUCCESS")
     EVENT_ID_INVALID = _("API_MAIL_INVALID_EVENT_ID")
     MAIL_ERROR = _("API_MAIL_ERROR")
-    TOO_MANY_EMAILS = _("API_MAIL_TOO_MANY")
+    TOO_MANY_EMAILS = _("API_MAIL_RECEIVERO_MANY")
     CONTACT_ADMIN = _("API_MAIL_CONTACT_ADMIN")
 
 
@@ -51,7 +51,7 @@ def post_emails() -> Response:
                     .all()
                 )
                 emails = set(user.email for user in users)
-                if len(emails) > config.EMAIL_MAX_BULK_COUNT:
+                if len(emails) > config.MAIL_MAX_RECEIVERS:
                     return json_response(400, Text.TOO_MANY_EMAILS)
                 data["emails"] = list(emails)
 

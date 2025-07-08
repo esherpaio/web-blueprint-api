@@ -4,12 +4,12 @@ from enum import StrEnum
 from sqlalchemy.orm import Session
 from web.api import HttpText, json_get, json_response
 from web.app.urls import parse_url, url_for
-from web.config import config
 from web.database import conn
 from web.database.model import User, Verification
 from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
+from web.setup import config
 from werkzeug import Response
 from werkzeug.security import generate_password_hash
 
@@ -96,7 +96,7 @@ def recover_user_password(s: Session, data: dict, model: User) -> None:
 
     # Send email
     reset_url = parse_url(
-        config.ENDPOINT_PASSWORD,
+        config.ENDPOINT_PASSWORD_RECOVERY,
         _func=url_for,
         _external=True,
         verification_key=verification.key,

@@ -5,10 +5,10 @@ from google.oauth2 import id_token
 from web.api import json_get, json_response
 from web.api.utils.cart import transfer_cart
 from web.auth import jwt_login, jwt_logout
-from web.config import config
 from web.database import conn
 from web.database.model import User, UserRoleId
 from web.i18n import _
+from web.setup import config
 from werkzeug import Response
 from werkzeug.security import check_password_hash
 

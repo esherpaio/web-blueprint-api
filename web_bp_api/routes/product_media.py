@@ -5,9 +5,9 @@ from flask import request
 from web import cdn
 from web.api import HttpText, json_get, json_response
 from web.auth import authorize
-from web.config import config
 from web.database import conn
 from web.database.model import File, FileTypeId, Product, ProductMedia, UserRoleLevel
+from web.setup import config
 from werkzeug import Response
 from werkzeug.utils import secure_filename
 
