@@ -1,1 +1,2 @@
 git+https://github.com/esherpaio/web-framework.git@refactor
+alembic==1.16.4

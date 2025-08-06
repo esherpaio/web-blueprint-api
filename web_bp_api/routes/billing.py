@@ -68,6 +68,7 @@ class BillingAPI(API):
 @api_bp.post("/billings")
 def post_billings() -> Response:
     api = BillingAPI()
+    api.validate_request()
     data = api.gen_data(api.post_columns)
     with conn.begin() as s:
         model = api.model()
@@ -80,6 +81,7 @@ def post_billings() -> Response:
 @api_bp.get("/billings/<int:billing_id>")
 def get_billings_id(billing_id: int) -> Response:
     api = BillingAPI()
+    api.validate_request()
     with conn.begin() as s:
         filters = {Billing.user_id == current_user.id}
         model: Billing = api.get(s, billing_id, *filters)
@@ -90,6 +92,7 @@ def get_billings_id(billing_id: int) -> Response:
 @api_bp.patch("/billings/<int:billing_id>")
 def patch_billings_id(billing_id: int) -> Response:
     api = BillingAPI()
+    api.validate_request()
     data = api.gen_data(api.patch_columns)
     with conn.begin() as s:
         filters = {Billing.user_id == current_user.id}

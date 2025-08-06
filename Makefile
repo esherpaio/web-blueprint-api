@@ -36,4 +36,6 @@ lint_html:
 
 .PHONY: test
 test:
+	pytest --maxfail=1 --verbose
+test_all:
 	pytest .
