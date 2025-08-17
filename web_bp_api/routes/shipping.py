@@ -65,6 +65,7 @@ class ShippingAPI(API):
 @api_bp.post("/shippings")
 def post_shippings() -> Response:
     api = ShippingAPI()
+    api.validate_request()
     data = api.gen_data(api.post_columns)
     with conn.begin() as s:
         model = api.model()
@@ -77,6 +78,7 @@ def post_shippings() -> Response:
 @api_bp.get("/shippings/<int:shipping_id>")
 def get_shippings_id(shipping_id: int) -> Response:
     api = ShippingAPI()
+    api.validate_request()
     with conn.begin() as s:
         filters = {Shipping.user_id == current_user.id}
         model: Shipping = api.get(s, shipping_id, *filters)
@@ -87,6 +89,7 @@ def get_shippings_id(shipping_id: int) -> Response:
 @api_bp.patch("/shippings/<int:shipping_id>")
 def patch_shippings_id(shipping_id: int) -> Response:
     api = ShippingAPI()
+    api.validate_request()
     data = api.gen_data(api.patch_columns)
     with conn.begin() as s:
         filters = {Shipping.user_id == current_user.id}

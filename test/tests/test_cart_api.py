@@ -1,6 +1,4 @@
 import pytest
-from web.database import conn
-from web.database.model import Coupon
 
 
 class TestCartAPI:
@@ -35,16 +33,16 @@ class TestCartAPI:
             "last_name": "Smith",
             "zip_code": "3512AB",
         }
-    
+
     #
     # Tests
     #
 
     def test_post_carts_success(self, client, user_auth, add_country_nl):
-        resp = client.post("/api/v1/carts", headers=user_auth, json={})
-        assert resp.status_code == 200
+        post_resp = client.post("/api/v1/carts", headers=user_auth, json={})
+        assert post_resp.status_code == 200
 
-        data = resp.json["data"]
+        data = post_resp.json["data"]
         assert "id" in data
         assert "user_id" in data
         assert data["items_count"] == 0
@@ -77,12 +75,10 @@ class TestCartAPI:
         self, client, patch_config, add_country_nl, allow_guest, status_code
     ):
         patch_config(AUTH_JWT_ALLOW_GUEST=allow_guest)
-        resp = client.get("/api/v1/carts")
-        assert resp.status_code == status_code
+        get_resp = client.get("/api/v1/carts")
+        assert get_resp.status_code == status_code
 
-    def test_get_carts_id_success(
-        self, client, user_auth, add_country_nl
-    ):
+    def test_get_carts_id_success(self, client, user_auth, add_country_nl):
         post_resp = client.post("/api/v1/carts", headers=user_auth, json={})
         assert post_resp.status_code == 200
 
@@ -97,14 +93,16 @@ class TestCartAPI:
         assert "total_price" in data
 
     def test_get_carts_id_not_found(self, client, user_auth, INVALID_ID):
-        resp = client.get(f"/api/v1/carts/{INVALID_ID}", headers=user_auth)
-        assert resp.status_code == 404
+        get_resp = client.get(f"/api/v1/carts/{INVALID_ID}", headers=user_auth)
+        assert get_resp.status_code == 404
 
     def test_get_carts_id_unauthorized(self, client):
-        resp = client.get("/api/v1/carts/1")
-        assert resp.status_code == 404
+        get_resp = client.get("/api/v1/carts/1")
+        assert get_resp.status_code == 404
 
-    def test_get_carts_id_different_user(self, client, user_auth, admin_auth, add_country_nl):
+    def test_get_carts_id_different_user(
+        self, client, user_auth, admin_auth, add_country_nl
+    ):
         post_resp = client.post("/api/v1/carts", headers=user_auth, json={})
         assert post_resp.status_code == 200
 
@@ -113,189 +111,129 @@ class TestCartAPI:
         assert get_resp.status_code == 404
 
     def test_patch_carts_id_with_billing(self, client, user_auth, billing_data):
-        billing_response = client.post(
+        billing_post_resp = client.post(
             "/api/v1/billings",
             headers=user_auth,
             json=billing_data,
         )
-        assert billing_response.status_code == 200
+        assert billing_post_resp.status_code == 200
 
-        billing_id = billing_response.json["data"]["id"]
-        cart_response = client.post(
-            "/api/v1/carts",
-            headers=user_auth,
-            json={},
-        )
-        assert cart_response.status_code == 200
+        cart_post_resp = client.post("/api/v1/carts", headers=user_auth, json={})
+        assert cart_post_resp.status_code == 200
 
-        cart_id = cart_response.json["data"]["id"]
-        resp = client.patch(
+        billing_id = billing_post_resp.json["data"]["id"]
+        cart_id = cart_post_resp.json["data"]["id"]
+        cart_patch_resp = client.patch(
             f"/api/v1/carts/{cart_id}",
             headers=user_auth,
             json={"billing_id": billing_id},
         )
-        assert resp.status_code == 200
+        assert cart_patch_resp.status_code == 200
 
-        data = resp.json["data"]
+        data = cart_patch_resp.json["data"]
         assert data["billing_id"] == billing_id
 
     def test_patch_carts_id_with_shipping(self, client, user_auth, billing_data):
         shipping_data = billing_data.copy()
         shipping_data["first_name"] = "Shipping"
         shipping_data["last_name"] = "Address"
-
-        shipping_response = client.post(
+        shipping_post_resp = client.post(
             "/api/v1/shippings",
             headers=user_auth,
             json=shipping_data,
         )
+        assert shipping_post_resp.status_code == 200
 
-        if shipping_response.status_code == 404:
-            pytest.skip("Shipping endpoint not available")
+        cart_post_resp = client.post("/api/v1/carts", headers=user_auth, json={})
+        assert cart_post_resp.status_code == 200
 
-        assert shipping_response.status_code == 200
-        shipping_id = shipping_response.json["data"]["id"]
-
-        cart_response = client.post(
-            "/api/v1/carts",
-            headers=user_auth,
-            json={},
-        )
-
-        assert cart_response.status_code == 200
-        cart_id = cart_response.json["data"]["id"]
-
+        shipping_id = shipping_post_resp.json["data"]["id"]
+        cart_id = cart_post_resp.json["data"]["id"]
         resp = client.patch(
             f"/api/v1/carts/{cart_id}",
             headers=user_auth,
             json={"shipping_id": shipping_id},
         )
-
         assert resp.status_code == 200
-        data = resp.json["data"]
 
+        data = resp.json["data"]
         assert data["shipping_id"] == shipping_id
 
-    def test_patch_carts_id_with_coupon_code(self, client, user_auth):
-        cart_response = client.post(
-            "/api/v1/carts",
-            headers=user_auth,
-            json={},
-        )
+    def test_patch_carts_id_with_coupon_code(
+        self, client, user_auth, add_country_nl, add_coupon_10perc
+    ):
+        post_cart_resp = client.post("/api/v1/carts", headers=user_auth, json={})
+        assert post_cart_resp.status_code == 200
 
-        assert cart_response.status_code == 200
-        cart_id = cart_response.json["data"]["id"]
-
-        with conn.begin() as s:
-            coupon = Coupon(
-                code="TEST10",
-                amount=10.00,
-                rate=0.1,
-                is_active=True,
-            )
-            s.add(coupon)
-            s.flush()
-            coupon_id = coupon.id
-
-        resp = client.patch(
+        cart_id = post_cart_resp.json["data"]["id"]
+        coupon_code = add_coupon_10perc.code
+        patch_cart_resp = client.patch(
             f"/api/v1/carts/{cart_id}",
             headers=user_auth,
-            json={"coupon_code": "TEST10"},
+            json={"coupon_code": coupon_code},
         )
+        assert patch_cart_resp.status_code == 200
 
-        assert resp.status_code == 200
-        data = resp.json["data"]
+        data = patch_cart_resp.json["data"]
+        assert data["coupon_code"] == add_coupon_10perc.code
+        assert data["coupon_id"] == add_coupon_10perc.id
 
-        assert data["coupon_code"] == "TEST10"
-        assert data["coupon_id"] == coupon_id
+    def test_patch_carts_id_invalid_coupon(self, client, user_auth, add_country_nl):
+        post_cart_resp = client.post("/api/v1/carts", headers=user_auth, json={})
+        assert post_cart_resp.status_code == 200
 
-    def test_patch_carts_id_invalid_coupon(self, client, user_auth):
-        cart_response = client.post(
-            "/api/v1/carts",
-            headers=user_auth,
-            json={},
-        )
-
-        assert cart_response.status_code == 200
-        cart_id = cart_response.json["data"]["id"]
-
-        resp = client.patch(
+        cart_id = post_cart_resp.json["data"]["id"]
+        patch_cart_resp = client.patch(
             f"/api/v1/carts/{cart_id}",
             headers=user_auth,
             json={"coupon_code": "INVALID"},
         )
-
-        assert resp.status_code == 400
+        assert patch_cart_resp.status_code == 400
 
     def test_patch_carts_id_not_found(self, client, user_auth, INVALID_ID):
-        resp = client.patch(
+        patch_resp = client.patch(
             f"/api/v1/carts/{INVALID_ID}",
             headers=user_auth,
             json={"billing_id": 1},
         )
-
-        assert resp.status_code == 404
+        assert patch_resp.status_code == 404
 
     def test_patch_carts_id_unauthorized(self, client):
-        resp = client.patch(
-            "/api/v1/carts/1",
-            json={"billing_id": 1},
-        )
+        patch_resp = client.patch("/api/v1/carts/1", json={"billing_id": 1})
+        assert patch_resp.status_code == 404
 
-        assert resp.status_code == 401
+    def test_delete_carts_id_success(self, client, user_auth, add_country_nl):
+        post_cart_resp = client.post("/api/v1/carts", headers=user_auth, json={})
+        assert post_cart_resp.status_code == 200
 
-    def test_delete_carts_id_success(self, client, user_auth):
-        create_response = client.post(
-            "/api/v1/carts",
-            headers=user_auth,
-            json={},
-        )
+        cart_id = post_cart_resp.json["data"]["id"]
+        delete_cart_resp = client.delete(f"/api/v1/carts/{cart_id}", headers=user_auth)
+        assert delete_cart_resp.status_code == 200
 
-        assert create_response.status_code == 200
-        cart_id = create_response.json["data"]["id"]
-
-        resp = client.delete(
-            f"/api/v1/carts/{cart_id}",
-            headers=user_auth,
-        )
-
-        assert resp.status_code == 200
-
-        get_response = client.get(
-            f"/api/v1/carts/{cart_id}",
-            headers=user_auth,
-        )
-
-        assert get_response.status_code == 404
+        get_cart_resp = client.get(f"/api/v1/carts/{cart_id}", headers=user_auth)
+        assert get_cart_resp.status_code == 404
 
     def test_delete_carts_id_not_found(self, client, user_auth, INVALID_ID):
-        resp = client.delete(
-            f"/api/v1/carts/{INVALID_ID}",
-            headers=user_auth,
-        )
-
-        assert resp.status_code == 404
+        del_cart_resp = client.delete(f"/api/v1/carts/{INVALID_ID}", headers=user_auth)
+        assert del_cart_resp.status_code == 404
 
     def test_delete_carts_id_unauthorized(self, client):
-        resp = client.delete(
-            "/api/v1/carts/1",
-        )
+        del_cart_resp = client.delete("/api/v1/carts/1")
+        assert del_cart_resp.status_code == 404
 
-        assert resp.status_code == 401
-
-    def test_delete_carts_id_different_user(self, client, user_auth, admin_auth):
-        create_response = client.post(
+    def test_delete_carts_id_different_user(
+        self, client, user_auth, admin_auth, add_country_nl
+    ):
+        post_cart_resp = client.post(
             "/api/v1/carts",
             headers=user_auth,
             json={},
         )
+        assert post_cart_resp.status_code == 200
 
-        assert create_response.status_code == 200
-        cart_id = create_response.json["data"]["id"]
-
-        resp = client.delete(
+        cart_id = post_cart_resp.json["data"]["id"]
+        del_cart_resp = client.delete(
             f"/api/v1/carts/{cart_id}",
             headers=admin_auth,
         )
-
-        assert resp.status_code == 404
+        assert del_cart_resp.status_code == 404

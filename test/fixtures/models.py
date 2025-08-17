@@ -1,7 +1,7 @@
 import pytest
 from web.cache import cache_manager
 from web.database import conn
-from web.database.model import Country, Currency, Language, Region
+from web.database import model as m
 
 #
 # Currency
@@ -11,7 +11,7 @@ from web.database.model import Country, Currency, Language, Region
 @pytest.fixture(scope="function")
 def add_currency_eur(client):
     with conn.begin() as s:
-        currency = Currency(code="EUR", rate=1, symbol="€")
+        currency = m.Currency(code="EUR", rate=1, symbol="€")
         s.add(currency)
     cache_manager.update(force=True)
     return currency
@@ -20,7 +20,7 @@ def add_currency_eur(client):
 @pytest.fixture(scope="function")
 def add_currency_gbp(client):
     with conn.begin() as s:
-        currency = Currency(code="GBP", rate=1, symbol="£")
+        currency = m.Currency(code="GBP", rate=1, symbol="£")
         s.add(currency)
     cache_manager.update(force=True)
     return currency
@@ -34,7 +34,7 @@ def add_currency_gbp(client):
 @pytest.fixture(scope="function")
 def add_region_europe(client):
     with conn.begin() as s:
-        region = Region(name="Europe")
+        region = m.Region(name="Europe")
         s.add(region)
     cache_manager.update(force=True)
     return region
@@ -48,7 +48,7 @@ def add_region_europe(client):
 @pytest.fixture(scope="function")
 def add_country_nl(client, add_currency_eur, add_region_europe):
     with conn.begin() as s:
-        country = Country(
+        country = m.Country(
             code="NL",
             in_sitemap=False,
             name="the Netherlands",
@@ -63,7 +63,7 @@ def add_country_nl(client, add_currency_eur, add_region_europe):
 @pytest.fixture(scope="function")
 def add_country_uk(client, add_currency_gbp, add_region_europe):
     with conn.begin() as s:
-        country = Country(
+        country = m.Country(
             code="GB",
             in_sitemap=False,
             name="United Kingdom",
@@ -83,7 +83,7 @@ def add_country_uk(client, add_currency_gbp, add_region_europe):
 @pytest.fixture(scope="function")
 def add_language_nl(client):
     with conn.begin() as s:
-        language = Language(
+        language = m.Language(
             code="nl",
             in_sitemap=False,
             name="Dutch",
@@ -94,42 +94,14 @@ def add_language_nl(client):
 
 
 #
-# User
+# Coupon
 #
 
 
 @pytest.fixture(scope="function")
-def user_data():
-    return {
-        "email": "user@esherpa.io",
-        "password": "password1234",
-        "password_eval": "password1234",
-        "bulk_email": True,
-    }
-
-
-@pytest.fixture(scope="function")
-def user_data_minimal():
-    return {
-        "email": "user@esherpa.io",
-        "password": "password1234",
-        "password_eval": "password1234",
-    }
-
-
-@pytest.fixture(scope="function")
-def add_user(client, user_auth, user_data):
-    return client.post(
-        "/api/v1/users",
-        headers=user_auth,
-        json=user_data,
-    )
-
-
-@pytest.fixture(scope="function")
-def add_user_minimal(client, user_auth, user_data_minimal):
-    return client.post(
-        "/api/v1/users",
-        headers=user_auth,
-        json=user_data_minimal,
-    )
+def add_coupon_10perc(client):
+    with conn.begin() as s:
+        obj = m.Coupon(code="10PERC", rate=0.1)
+        s.add(obj)
+    cache_manager.update(force=True)
+    return obj
