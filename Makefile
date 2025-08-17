@@ -1,8 +1,6 @@
-.PHONY: venv commit
+.PHONY: venv
 venv:
 	python3 -m venv .venv
-commit:
-	git rev-parse --short HEAD
 
 .PHONY: packages
 packages:
@@ -14,8 +12,6 @@ packages:
 .PHONY: migrations migrate
 migrations:
 	alembic check || alembic revision --autogenerate -m ""
-migrate:
-	alembic upgrade head
 
 .PHONY: format format_py format_html
 format: format_py format_html
@@ -36,6 +32,4 @@ lint_html:
 
 .PHONY: test
 test:
-	pytest --maxfail=1 --verbose
-test_all:
 	pytest .
