@@ -20,7 +20,7 @@ from bp_api import api_bp
 @authorize(UserRoleLevel.ADMIN)
 def post_products_id_links(product_id: int) -> Response:
     sku_id, _ = json_get("sku_id", int, nullable=False)
-    type_id, _ = json_get("type_id", int, nullable=False)
+    type_id, _ = json_get("type_id", str, nullable=False)
 
     with conn.begin() as s:
         # Check if product link already exists
