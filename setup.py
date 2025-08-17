@@ -24,6 +24,6 @@ setup(
     include_package_data=True,
     package_data={"": DATA},
     packages=find_packages(
-        include=["web_bp_api", "web_bp_api.*", "web_bp_webhook", "web_bp_webhook.*"]
+        include=["bp_api", "bp_api.*", "bp_webhook", "bp_webhook.*"]
     ),
 )

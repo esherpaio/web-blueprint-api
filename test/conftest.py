@@ -10,8 +10,8 @@ from web.logger import log
 from web.setup.server import Server
 
 import test.config as config
-from web_bp_api import api_bp
-from web_bp_webhook import webhook_bp
+from bp_api import api_bp
+from bp_webhook import webhook_bp
 
 from .tasks import UserSeedSyncer
 
