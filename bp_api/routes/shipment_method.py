@@ -32,7 +32,7 @@ class ShipmentMethodAPI(API):
     get_columns = {
         ShipmentMethod.id,
         ShipmentMethod.name,
-        ShipmentMethod.phone_required,
+        ShipmentMethod.requires_billing_phone,
         ShipmentMethod.unit_price,
         ShipmentMethod.class_id,
         ShipmentMethod.zone_id,
@@ -49,7 +49,7 @@ class ShipmentMethodAPI(API):
 def post_shipment_methods() -> Response:
     class_id, _ = json_get("class_id", int, nullable=False)
     name, _ = json_get("name", str, nullable=False)
-    phone_required, _ = json_get("phone_required", bool, default=False)
+    requires_billing_phone, _ = json_get("requires_billing_phone", bool, default=False)
     unit_price, _ = json_get("unit_price", Decimal, nullable=False)
     zone_id, _ = json_get("zone_id", int, nullable=False)
 
@@ -60,7 +60,7 @@ def post_shipment_methods() -> Response:
             class_id=class_id,
             zone_id=zone_id,
             unit_price=unit_price,
-            phone_required=phone_required,
+            requires_billing_phone=requires_billing_phone,
         )
         s.add(shipment_method)
 
@@ -90,7 +90,9 @@ def get_shipment_methods_id(shipment_method_id: int) -> Response:
 @authorize(UserRoleLevel.ADMIN)
 def patch_shipment_methods_id(shipment_method_id: int) -> Response:
     name, has_name = json_get("name", str)
-    phone_required, has_phone_required = json_get("phone_required", bool)
+    requires_billing_phone, has_requires_billing_phone = json_get(
+        "requires_billing_phone", bool
+    )
     unit_price, has_unit_price = json_get("unit_price", Decimal)
 
     with conn.begin() as s:
@@ -106,8 +108,8 @@ def patch_shipment_methods_id(shipment_method_id: int) -> Response:
             shipment_method.name = name
         if has_unit_price:
             shipment_method.unit_price = unit_price
-        if has_phone_required:
-            shipment_method.phone_required = phone_required
+        if has_requires_billing_phone:
+            shipment_method.requires_billing_phone = requires_billing_phone
 
     return json_response()
 

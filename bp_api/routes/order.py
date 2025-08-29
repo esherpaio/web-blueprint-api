@@ -134,12 +134,12 @@ def val_cart(s: Session, data: dict, model: Order) -> None:
             abort(json_response(400, Text.SHIPMENT_METHOD_INVALID))
     # Check phone required
     if cart.shipment_method is not None:
-        if cart.shipment_method.phone_required:
+        if cart.shipment_method.requires_billing_phone:
             if cart.billing.phone is None:
                 abort(json_response(400, Text.PHONE_REQUIRED))
     # Check VAT required in Europe
     if cart.billing.company is not None:
-        if cart.billing.country.vat_required:
+        if cart.billing.country.requires_billing_vat:
             if cart.billing.vat is None:
                 abort(json_response(400, Text.VAT_REQUIRED))
     # Check VAT number
@@ -149,7 +149,7 @@ def val_cart(s: Session, data: dict, model: Order) -> None:
         if not is_valid:
             abort(json_response(400, Text.VAT_INVALID))
     # Check state
-    if cart.billing.country.state_required:
+    if cart.billing.country.requires_billing_state:
         if cart.billing.state is None:
             abort(json_response(400, Text.STATE_REQUIRED))
 
