@@ -17,10 +17,12 @@ class CountryAPI(API):
         Country.code,
         Country.in_sitemap,
         Country.name,
+        Country.is_active,
         Country.currency_id,
         Country.region_id,
     }
     patch_columns = {
+        Country.is_active,
         Country.state_required,
         Country.vat_required,
     }
@@ -29,6 +31,7 @@ class CountryAPI(API):
         Country.in_sitemap,
         Country.name,
         Country.id,
+        Country.is_active,
         Country.currency_id,
         Country.region_id,
     }
