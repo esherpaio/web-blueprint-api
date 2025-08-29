@@ -41,6 +41,7 @@ class Text(StrEnum):
     SHIPMENT_METHOD_REQUIRED = _("API_SHIPMENT_METHOD_REQUIRED")
     SHIPMENT_METHOD_INVALID = _("API_SHIPMENT_METHOD_INVALID")
     CANCEL_NOT_ALLOWED = _("API_ORDER_CANCEL_NOT_ALLOWED")
+    SHIPMENT_COUNTRY_UNALLOWED = _("API_SHIPMENT_COUNTRY_UNALLOWED")
 
 
 class OrderAPI(API):
@@ -152,6 +153,9 @@ def val_cart(s: Session, data: dict, model: Order) -> None:
     if cart.billing.country.requires_billing_state:
         if cart.billing.state is None:
             abort(json_response(400, Text.STATE_REQUIRED))
+    # Check country allowed
+    if not cart.shipping.country.allows_shipping:
+        abort(json_response(400, Text.SHIPMENT_COUNTRY_UNALLOWED))
 
 
 def set_order(s: Session, data: dict, model: Order) -> None:
