@@ -17,18 +17,21 @@ class CountryAPI(API):
         Country.code,
         Country.in_sitemap,
         Country.name,
+        Country.allows_shipping,
         Country.currency_id,
         Country.region_id,
     }
     patch_columns = {
-        Country.state_required,
-        Country.vat_required,
+        Country.allows_shipping,
+        Country.requires_billing_state,
+        Country.requires_billing_vat,
     }
     get_columns = {
         Country.code,
         Country.in_sitemap,
         Country.name,
         Country.id,
+        Country.allows_shipping,
         Country.currency_id,
         Country.region_id,
     }

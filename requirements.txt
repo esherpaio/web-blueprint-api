@@ -1,2 +1,2 @@
-git+https://github.com/esherpaio/web-framework.git@refactor
+git+https://github.com/esherpaio/web-framework.git@inactive_countries
 alembic==1.16.4
