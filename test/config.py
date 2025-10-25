@@ -12,6 +12,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEBUG = True
 LOG_LEVEL = "DEBUG"
 URL_SCHEME = "https"
+DATABASE_MODULE = None
 
 WORKER_ENABLED = False
 WORKER_INTERVAL_S = 300
