@@ -116,6 +116,8 @@ def patch_users_id(user_id: int) -> Response:
 
 def set_password(s: Session, data: dict, model: User) -> None:
     password = data["password"]
+    if password is None:
+        return
     password_eval = data["password_eval"]
     if len(password) < 8:
         abort(json_response(400, Text.PASSWORD_LENGTH))
