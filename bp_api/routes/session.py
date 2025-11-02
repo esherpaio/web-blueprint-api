@@ -79,13 +79,21 @@ def post_sessions_google() -> Response:
     if email is None:
         return json_response(400, Text.GOOGLE_INVALID)
 
+    name = token.get("given_name")
+    attributes = {"name": name} if name else {}
+
     # Get or add user
     with conn.begin() as s:
         user = s.query(User).filter_by(email=email.lower()).first()
         if user is not None and not user.is_active:
             user.is_active = True
         if user is None:
-            user = User(email=email, is_active=True, role_id=UserRoleId.USER)
+            user = User(
+                email=email,
+                is_active=True,
+                role_id=UserRoleId.USER,
+                attributes=attributes,
+            )
             s.add(user)
 
     # Login user
