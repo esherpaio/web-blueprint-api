@@ -31,6 +31,7 @@ class Text(StrEnum):
 class UserAPI(API):
     model = User
     post_columns = {
+        User.display_name,
         User.email,
         User.billing_id,
         User.shipping_id,
@@ -40,6 +41,7 @@ class UserAPI(API):
         "password_eval",
     }
     patch_columns = {
+        User.display_name,
         User.billing_id,
         User.shipping_id,
         User.bulk_email,
@@ -57,6 +59,7 @@ class UserAPI(API):
         User.shipping_id,
         User.bulk_email,
         User.newsletter_email,
+        User.display_name,
     }
 
 

@@ -75,24 +75,24 @@ def post_sessions_google() -> Response:
     token = id_token.verify_oauth2_token(
         token_id, requests.Request(), audience=config.GOOGLE_CLIENT_ID
     )
+    display_name = token.get("given_name")
     email = token.get("email")
     if email is None:
         return json_response(400, Text.GOOGLE_INVALID)
-
-    name = token.get("given_name")
-    attributes = {"name": name} if name else {}
 
     # Get or add user
     with conn.begin() as s:
         user = s.query(User).filter_by(email=email.lower()).first()
         if user is not None and not user.is_active:
             user.is_active = True
+        if user is not None and display_name:
+            user.display_name = display_name
         if user is None:
             user = User(
+                display_name=display_name,
                 email=email,
                 is_active=True,
                 role_id=UserRoleId.USER,
-                attributes=attributes,
             )
             s.add(user)
 
