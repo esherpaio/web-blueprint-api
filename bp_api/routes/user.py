@@ -87,7 +87,7 @@ def get_users() -> Response:
     api = UserAPI()
     data = api.gen_query_data(api.get_filters)
     with conn.begin() as s:
-        if current_user is not None and current_user.is_active:
+        if current_user and current_user.is_active:
             filters = {User.id == current_user.id, User.is_active == true()}
         else:
             filters = api.gen_query_filters(data, required=True)
