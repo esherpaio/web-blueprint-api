@@ -35,6 +35,7 @@ class UserAPI(API):
         User.billing_id,
         User.shipping_id,
         User.bulk_email,
+        User.newsletter_email,
         "password",
         "password_eval",
     }
@@ -42,6 +43,7 @@ class UserAPI(API):
         User.billing_id,
         User.shipping_id,
         User.bulk_email,
+        User.newsletter_email,
     }
     get_filters = {
         User.email,
@@ -54,6 +56,7 @@ class UserAPI(API):
         User.billing_id,
         User.shipping_id,
         User.bulk_email,
+        User.newsletter_email,
     }
 
 
@@ -81,7 +84,10 @@ def get_users() -> Response:
     api = UserAPI()
     data = api.gen_query_data(api.get_filters)
     with conn.begin() as s:
-        filters = api.gen_query_filters(data, required=True)
+        if current_user is not None and current_user.is_active:
+            filters = {User.id == current_user.id, User.is_active == true()}
+        else:
+            filters = api.gen_query_filters(data, required=True)
         models: list[User] = api.list_(s, *filters, limit=1)
         resources = api.gen_resources(s, models)
     return json_response(data=resources)
