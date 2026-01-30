@@ -1,3 +1,5 @@
+import json
+import urllib.request
 from enum import StrEnum
 
 from google.auth.transport import requests
@@ -71,33 +73,50 @@ def delete_sessions() -> Response:
 @api_bp.post("/sessions/google")
 @transfer_cart
 def post_sessions_google() -> Response:
-    token_id, _ = json_get("token_id", str, nullable=False)
-    token = id_token.verify_oauth2_token(
-        token_id, requests.Request(), audience=config.GOOGLE_CLIENT_ID
-    )
-    display_name = token.get("given_name")
-    email = token.get("email")
+    token_id, _ = json_get("token_id", str, nullable=True)
+    access_token, _ = json_get("access_token", str, nullable=True)
+
+    if token_id:
+        data = id_token.verify_oauth2_token(
+            token_id,
+            requests.Request(),
+            audience=config.GOOGLE_CLIENT_ID,
+        )
+        display_name = data.get("given_name")
+        email = data.get("email")
+    elif access_token:
+        resp = urllib.request.Request(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        with urllib.request.urlopen(resp) as response:
+            data = json.loads(response.read().decode())
+        display_name = data.get("given_name")
+        email = data.get("email")
+    else:
+        return json_response(400, Text.GOOGLE_INVALID)
+
     if email is None:
         return json_response(400, Text.GOOGLE_INVALID)
 
     # Get or add user
     with conn.begin() as s:
-        user = s.query(User).filter_by(email=email.lower()).first()
-        if user is not None and not user.is_active:
-            user.is_active = True
-        if user is not None and display_name:
-            user.display_name = display_name
-        if user is None:
-            user = User(
+        data = s.query(User).filter_by(email=email.lower()).first()
+        if data is not None and not data.is_active:
+            data.is_active = True
+        if data is not None and display_name:
+            data.display_name = display_name
+        if data is None:
+            data = User(
                 display_name=display_name,
                 email=email,
                 is_active=True,
                 role_id=UserRoleId.USER,
             )
-            s.add(user)
+            s.add(data)
 
     # Login user
-    jwt_login(user.id)
+    jwt_login(data.id)
     return json_response()
 
 
