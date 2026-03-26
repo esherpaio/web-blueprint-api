@@ -1,4 +1,4 @@
-from ._bp import api_bp
+from .blueprint import api_bp
 from .routes import (
     article,
     article_media,
