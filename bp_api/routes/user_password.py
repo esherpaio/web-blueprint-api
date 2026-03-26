@@ -1,6 +1,7 @@
 import uuid
 from enum import StrEnum
 
+from flask import abort
 from sqlalchemy.orm import Session
 from web.api import HttpText, json_get, json_response
 from web.app.urls import parse_url, url_for
@@ -88,6 +89,10 @@ def patch_users_id_password(user_id: int) -> Response:
 
 
 def recover_user_password(s: Session, data: dict, model: User) -> None:
+    # Validation
+    if not model.id or not model.email:
+        abort(json_response(400, Text.VERIFICATION_FAILED))
+
     # Insert verification
     key = str(uuid.uuid4())
     verification = Verification(user_id=model.id, key=key)
