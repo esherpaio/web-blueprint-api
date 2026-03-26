@@ -1,6 +1,6 @@
 from web.setup import config
 
-from ._bp import webhook_bp
+from .blueprint import webhook_bp
 from .routes import mollie
 
 if config.INTIME_ENABLED:

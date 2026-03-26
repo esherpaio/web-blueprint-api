@@ -1,10 +1,13 @@
+import time
 from enum import StrEnum
 
+import requests
 from sqlalchemy import null, true
 from web.api import json_get, json_response
 from web.database import conn
 from web.database.model import User
 from web.i18n import _
+from web.logger import log
 from web.mail import mail
 from web.mail.enum import MailEvent
 from web.setup import config
@@ -32,8 +35,16 @@ class Text(StrEnum):
 
 @api_bp.post("/emails")
 def post_emails() -> Response:
-    event_id, _ = json_get("event_id", str)
+    event_id, _ = json_get("event_id", str, nullable=False)
+    turnstile_token, has_turnstile_token = json_get("turnstile_token", str)
     data, _ = json_get("data", dict, default={})
+
+    if (
+        config.TURNSTILE_SITE_KEY
+        and config.TURNSTILE_SECRET_KEY
+        and (not has_turnstile_token or not validate_turnstile(turnstile_token))
+    ):
+        return json_response(403, Text.MAIL_ERROR)
 
     with conn.begin() as s:
         # Inject emails for bulk email
@@ -66,3 +77,22 @@ def post_emails() -> Response:
 #
 # Functions
 #
+
+
+def validate_turnstile(token: str) -> bool:
+    if not config.TURNSTILE_SITE_KEY or not config.TURNSTILE_SECRET_KEY:
+        log.error("Turnstile keys not configured")
+        return False
+
+    url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+    data = {"secret": config.TURNSTILE_SECRET_KEY, "response": token}
+
+    try:
+        response = requests.post(url, data=data, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        return data["success"]
+    except requests.RequestException as e:
+        log.warning(f"Turnstile validation error: {e}")
+        time.sleep(5)  # Sleep to mitigate potential abuse
+        return False
