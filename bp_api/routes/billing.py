@@ -76,8 +76,8 @@ def post_billings() -> Response:
     with conn.begin() as s:
         model = api.model()
         set_user(s, data, model)
+        clear_default(s, data, model)
         api.insert(s, data, model)
-        set_default(s, data, model)
         resource = api.gen_resource(s, model)
     return json_response(data=resource)
 
@@ -102,8 +102,8 @@ def patch_billings_id(billing_id: int) -> Response:
         filters = {Billing.user_id == current_user.id}
         model: Billing = api.get(s, billing_id, *filters)
         val_order(s, data, model)
+        clear_default(s, data, model)
         api.update(s, data, model)
-        set_default(s, data, model)
         set_cart(s, data, model)
         resource = api.gen_resource(s, model)
     return json_response(data=resource)
@@ -118,18 +118,22 @@ def set_user(s: Session, data: dict, model: Billing) -> None:
     model.user_id = current_user.id
 
 
-def set_default(s: Session, data: dict, model: Billing) -> None:
-    """Demote any other default for this user when this row is marked default.
+def clear_default(s: Session, data: dict, model: Billing) -> None:
+    """Demote the user's existing default before this row becomes the new default.
 
-    Runs after insert/update so ``model.id`` is populated.
+    Must run before insert/update; otherwise the partial unique index
+    (one default per user) would reject the flush with a 409.
     """
-    if not model.is_default:
+    if not data.get("is_default"):
         return
-    s.query(Billing).filter(
-        Billing.user_id == model.user_id,
-        Billing.id != model.id,
+    q = s.query(Billing).filter(
+        Billing.user_id == current_user.id,
         Billing.is_default.is_(True),
-    ).update({Billing.is_default: False}, synchronize_session=False)
+    )
+    if model.id is not None:
+        q = q.filter(Billing.id != model.id)
+    q.update({Billing.is_default: False}, synchronize_session=False)
+    s.flush()
 
 
 def set_cart(s: Session, data: dict, model: Billing) -> None:
