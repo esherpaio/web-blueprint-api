@@ -24,6 +24,7 @@ class BillingAPI(API):
         Billing.country_id,
         Billing.email,
         Billing.first_name,
+        Billing.is_default,
         Billing.last_name,
         Billing.phone,
         Billing.state,
@@ -37,6 +38,7 @@ class BillingAPI(API):
         Billing.country_id,
         Billing.email,
         Billing.first_name,
+        Billing.is_default,
         Billing.last_name,
         Billing.phone,
         Billing.state,
@@ -51,6 +53,7 @@ class BillingAPI(API):
         Billing.email,
         Billing.first_name,
         Billing.id,
+        Billing.is_default,
         Billing.last_name,
         Billing.phone,
         Billing.state,
@@ -74,6 +77,7 @@ def post_billings() -> Response:
         model = api.model()
         set_user(s, data, model)
         api.insert(s, data, model)
+        set_default(s, data, model)
         resource = api.gen_resource(s, model)
     return json_response(data=resource)
 
@@ -99,6 +103,7 @@ def patch_billings_id(billing_id: int) -> Response:
         model: Billing = api.get(s, billing_id, *filters)
         val_order(s, data, model)
         api.update(s, data, model)
+        set_default(s, data, model)
         set_cart(s, data, model)
         resource = api.gen_resource(s, model)
     return json_response(data=resource)
@@ -111,6 +116,20 @@ def patch_billings_id(billing_id: int) -> Response:
 
 def set_user(s: Session, data: dict, model: Billing) -> None:
     model.user_id = current_user.id
+
+
+def set_default(s: Session, data: dict, model: Billing) -> None:
+    """Demote any other default for this user when this row is marked default.
+
+    Runs after insert/update so ``model.id`` is populated.
+    """
+    if not model.is_default:
+        return
+    s.query(Billing).filter(
+        Billing.user_id == model.user_id,
+        Billing.id != model.id,
+        Billing.is_default.is_(True),
+    ).update({Billing.is_default: False}, synchronize_session=False)
 
 
 def set_cart(s: Session, data: dict, model: Billing) -> None:

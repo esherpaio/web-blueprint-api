@@ -171,6 +171,9 @@ def set_order(s: Session, data: dict, model: Order) -> None:
     # copy billing and shipping
     model.billing = copy_row(s, cart.billing, Billing())
     model.shipping = copy_row(s, cart.shipping, Shipping())
+    # snapshots are never user defaults
+    model.billing.is_default = False
+    model.shipping.is_default = False
     # set values
     model.billing_id = cart.billing_id
     model.currency_code = cart.currency.code

@@ -24,6 +24,7 @@ class ShippingAPI(API):
         Shipping.country_id,
         Shipping.email,
         Shipping.first_name,
+        Shipping.is_default,
         Shipping.last_name,
         Shipping.phone,
         Shipping.state,
@@ -36,6 +37,7 @@ class ShippingAPI(API):
         Shipping.country_id,
         Shipping.email,
         Shipping.first_name,
+        Shipping.is_default,
         Shipping.last_name,
         Shipping.phone,
         Shipping.state,
@@ -49,6 +51,7 @@ class ShippingAPI(API):
         Shipping.email,
         Shipping.first_name,
         Shipping.id,
+        Shipping.is_default,
         Shipping.last_name,
         Shipping.phone,
         Shipping.state,
@@ -71,6 +74,7 @@ def post_shippings() -> Response:
         model = api.model()
         set_user(s, data, model)
         api.insert(s, data, model)
+        set_default(s, data, model)
         resource = api.gen_resource(s, model)
     return json_response(data=resource)
 
@@ -96,6 +100,7 @@ def patch_shippings_id(shipping_id: int) -> Response:
         model: Shipping = api.get(s, shipping_id, *filters)
         val_order(s, data, model)
         api.update(s, data, model)
+        set_default(s, data, model)
         set_cart(s, data, model)
         resource = api.gen_resource(s, model)
     return json_response(data=resource)
@@ -108,6 +113,20 @@ def patch_shippings_id(shipping_id: int) -> Response:
 
 def set_user(s: Session, data: dict, model: Shipping) -> None:
     model.user_id = current_user.id
+
+
+def set_default(s: Session, data: dict, model: Shipping) -> None:
+    """Demote any other default for this user when this row is marked default.
+
+    Runs after insert/update so ``model.id`` is populated.
+    """
+    if not model.is_default:
+        return
+    s.query(Shipping).filter(
+        Shipping.user_id == model.user_id,
+        Shipping.id != model.id,
+        Shipping.is_default.is_(True),
+    ).update({Shipping.is_default: False}, synchronize_session=False)
 
 
 def set_cart(s: Session, data: dict, model: Shipping) -> None:
