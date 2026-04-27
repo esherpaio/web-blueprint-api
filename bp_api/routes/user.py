@@ -33,8 +33,6 @@ class UserAPI(API):
     post_columns = {
         User.display_name,
         User.email,
-        User.billing_id,
-        User.shipping_id,
         User.bulk_email,
         User.newsletter_email,
         "password",
@@ -42,8 +40,6 @@ class UserAPI(API):
     }
     patch_columns = {
         User.display_name,
-        User.billing_id,
-        User.shipping_id,
         User.bulk_email,
         User.newsletter_email,
     }
@@ -55,11 +51,11 @@ class UserAPI(API):
         User.is_active,
         User.role_id,
         User.email,
-        User.billing_id,
-        User.shipping_id,
         User.bulk_email,
         User.newsletter_email,
         User.display_name,
+        "default_billing_id",
+        "default_shipping_id",
     }
 
 
