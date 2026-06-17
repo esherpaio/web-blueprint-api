@@ -109,6 +109,7 @@ def recover_user_password(s: Session, data: dict, model: User) -> None:
     mail.trigger_events(
         s,
         MailEvent.USER_REQUEST_PASSWORD,
+        model.id,
         email=model.email,
         reset_url=reset_url,
     )

@@ -76,6 +76,7 @@ def post_orders_id_refund(order_id: int) -> Response:
         mail.trigger_events(
             s,
             MailEvent.ORDER_REFUNDED,
+            order.user_id,
             order_id=order.id,
             refund_id=refund.id,
             billing_email=order.billing.email,

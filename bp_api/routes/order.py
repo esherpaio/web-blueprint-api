@@ -206,6 +206,7 @@ def mail_order(s: Session, data: dict, model: Order) -> None:
         mail.trigger_events(
             s,
             MailEvent.ORDER_RECEIVED,
+            model.user_id,
             order_id=model.id,
             billing_email=model.billing.email,
             shipping_email=model.shipping.email,

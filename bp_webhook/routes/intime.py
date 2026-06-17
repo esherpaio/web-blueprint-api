@@ -200,6 +200,7 @@ def intime_orders_id_update_tracking(order_id: str) -> Response:
             mail.trigger_events(
                 s,
                 MailEvent.ORDER_SHIPPED,
+                order.user_id,
                 order_id=order.id,
                 shipment_url=url,
                 billing_email=order.billing.email,

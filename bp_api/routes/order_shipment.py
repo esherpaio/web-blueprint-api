@@ -42,6 +42,7 @@ def post_orders_id_shipments(order_id: int) -> Response:
         mail.trigger_events(
             s,
             MailEvent.ORDER_SHIPPED,
+            order.user_id,
             order_id=order_id,
             shipment_url=url,
             billing_email=order.billing.email,
