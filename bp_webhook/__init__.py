@@ -5,10 +5,3 @@ from .routes import mollie
 
 if config.INTIME_ENABLED:
     from .routes import intime
-
-
-__all__ = [
-    "intime",
-    "mollie",
-    "webhook_bp",
-]
