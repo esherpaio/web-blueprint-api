@@ -128,11 +128,11 @@ def set_cart(s: Session, data: dict, model: None) -> None:
     cart = s.query(Cart).filter(Cart.id == cart_id).first()
     if cart is not None:
         if cart.coupon_id is None:
-            default_coupon = (
+            coupon = (
                 s.query(Coupon).filter_by(is_default=True, is_deleted=False).first()
             )
-            if default_coupon is not None:
-                cart.coupon_id = default_coupon.id
+            if coupon is not None:
+                cart.coupon_id = coupon.id
         shipment_methods = get_shipment_methods(s, cart)
         if shipment_methods:
             shipment_method = min(shipment_methods, key=none_attrgetter("unit_price"))
