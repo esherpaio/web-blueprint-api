@@ -13,6 +13,7 @@ from .routes import (
     email,
     language,
     order,
+    order_invoice,
     order_payment,
     order_refund,
     order_shipment,
