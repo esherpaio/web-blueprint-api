@@ -6,7 +6,7 @@ from web.api import API, HttpText, json_response
 from web.api.utils.cart import get_shipment_methods
 from web.auth import current_user
 from web.database import conn
-from web.database.model import Cart, CartItem
+from web.database.model import Cart, CartItem, Coupon
 from web.i18n import _
 from web.utils import none_attrgetter
 from werkzeug import Response
@@ -127,6 +127,12 @@ def set_cart(s: Session, data: dict, model: None) -> None:
     cart_id = data["cart_id"]
     cart = s.query(Cart).filter(Cart.id == cart_id).first()
     if cart is not None:
+        if cart.coupon_id is None:
+            coupon = (
+                s.query(Coupon).filter_by(is_default=True, is_deleted=False).first()
+            )
+            if coupon is not None:
+                cart.coupon_id = coupon.id
         shipment_methods = get_shipment_methods(s, cart)
         if shipment_methods:
             shipment_method = min(shipment_methods, key=none_attrgetter("unit_price"))
