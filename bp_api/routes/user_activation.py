@@ -1,10 +1,11 @@
 import uuid
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 
 from web.api import HttpText, json_get, json_response
 from web.app.urls import parse_url, url_for
 from web.database import conn
-from web.database.model import User, Verification
+from web.database.model import User, Verification, VerificationType
 from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
@@ -39,7 +40,14 @@ def post_users_id_activation(user_id: int) -> Response:
 
         # Insert verification
         verification_key = str(uuid.uuid4())
-        verification = Verification(user_id=user.id, key=verification_key)
+        now = datetime.now(UTC)
+        verification = Verification(
+            user_id=user.id,
+            key=verification_key,
+            type=VerificationType.VERIFICATION,
+            valid_from=now,
+            expires_at=now + timedelta(days=1),
+        )
         s.add(verification)
         s.flush()
 

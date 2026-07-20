@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 
 from flask import abort
@@ -6,7 +7,7 @@ from sqlalchemy.orm import Session
 from web.api import HttpText, json_get, json_response
 from web.app.urls import parse_url, url_for
 from web.database import conn
-from web.database.model import User, Verification
+from web.database.model import User, Verification, VerificationType
 from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
@@ -95,7 +96,14 @@ def recover_user_password(s: Session, data: dict, model: User) -> None:
 
     # Insert verification
     key = str(uuid.uuid4())
-    verification = Verification(user_id=model.id, key=key)
+    now = datetime.now(UTC)
+    verification = Verification(
+        user_id=model.id,
+        key=key,
+        type=VerificationType.PASSWORD,
+        valid_from=now,
+        expires_at=now + timedelta(days=1),
+    )
     s.add(verification)
     s.flush()
 
