@@ -1,14 +1,14 @@
 import json
 import urllib.request
 from enum import StrEnum
+from typing import Callable
 
 from google.auth.transport import requests
 from google.oauth2 import id_token
 from web.api import json_get, json_response
-from web.api.utils.cart import transfer_cart
-from web.auth import jwt_login, jwt_logout
+from web.auth import current_user, jwt_login, jwt_logout
 from web.database import conn
-from web.database.model import User, UserRoleId
+from web.database.model import Cart, User, UserRoleId
 from web.i18n import _
 from web.setup import config
 from werkzeug import Response
@@ -28,6 +28,33 @@ class Text(StrEnum):
     CHECK_ACTIVATION = _("API_SESSION_CHECK_ACTIVATION")
     CHECK_PASSWORD = _("API_SESSION_CHECK_PASSWORD")
     GOOGLE_INVALID = _("API_SESSION_GOOGLE_INVALID")
+
+
+#
+# Functions
+#
+
+
+def transfer_cart(f: Callable) -> Callable[..., Response]:
+    def wrap(*args, **kwargs) -> Response:
+        with conn.begin() as s:
+            if not current_user:
+                return f(*args, **kwargs)
+            # Get before and after user ids
+            prev_user_id = current_user.id
+            resp = f(*args, **kwargs)
+            curr_user_id = current_user.id
+            # Transfer cart
+            prev_cart = s.query(Cart).filter_by(user_id=prev_user_id).first()
+            if prev_cart is not None:
+                s.query(Cart).filter_by(user_id=curr_user_id).delete()
+                prev_cart.user_id = curr_user_id
+                s.flush()
+
+        return resp
+
+    wrap.__name__ = f.__name__
+    return wrap
 
 
 #
@@ -118,8 +145,3 @@ def post_sessions_google() -> Response:
     # Login user
     jwt_login(data.id)
     return json_response()
-
-
-#
-# Functions
-#
