@@ -5,7 +5,7 @@ from enum import StrEnum
 from flask import abort
 from sqlalchemy.orm import Session
 from web.api import HttpText, json_get, json_response
-from web.app.urls import parse_url, url_for
+from web.app.urls import url_for
 from web.database import conn
 from web.database.model import User, Verification, VerificationType
 from web.i18n import _
@@ -108,9 +108,8 @@ def recover_user_password(s: Session, data: dict, model: User) -> None:
     s.flush()
 
     # Send email
-    reset_url = parse_url(
+    reset_url = url_for(
         config.ENDPOINT_PASSWORD_RECOVERY,
-        _func=url_for,
         _external=True,
         verification_key=verification.key,
     )

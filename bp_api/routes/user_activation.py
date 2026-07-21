@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 
 from web.api import HttpText, json_get, json_response
-from web.app.urls import parse_url, url_for
+from web.app.urls import url_for
 from web.database import conn
 from web.database.model import User, Verification, VerificationType
 from web.i18n import _
@@ -52,9 +52,8 @@ def post_users_id_activation(user_id: int) -> Response:
         s.flush()
 
         # Send email
-        verification_url = parse_url(
+        verification_url = url_for(
             config.ENDPOINT_LOGIN,
-            _func=url_for,
             _external=True,
             verification_key=verification.key,
         )
