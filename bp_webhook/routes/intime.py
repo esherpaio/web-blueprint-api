@@ -3,6 +3,7 @@ import json
 from sqlalchemy import false, null
 from sqlalchemy.orm import joinedload
 from web.api import JsonEncoder, json_get
+from web.api.utils.review import create_review_request
 from web.auth import authorize
 from web.database import conn
 from web.database.model import (
@@ -207,6 +208,7 @@ def intime_orders_id_update_tracking(order_id: str) -> Response:
                 shipping_email=order.shipping.email,
                 shipping_address=order.shipping.full_address,
             )
+            create_review_request(s, order)
     return response(data={"hasUpdated": has_updated})
 
 
@@ -218,5 +220,6 @@ def intime_orders_id_fulfill(order_id: str) -> Response:
         if order is None:
             return response(404)
         order.status_id = OrderStatusId.COMPLETED
+        create_review_request(s, order)
         has_fulfilled = True
     return response(data={"hasFulfilled": has_fulfilled})

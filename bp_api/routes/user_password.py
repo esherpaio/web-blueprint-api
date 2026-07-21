@@ -62,7 +62,11 @@ def patch_users_id_password(user_id: int) -> Response:
             return json_response(404, HttpText.HTTP_404)
 
         # Check verification
-        verification = s.query(Verification).filter_by(key=verification_key).first()
+        verification = (
+            s.query(Verification)
+            .filter_by(key=verification_key, type=VerificationType.PASSWORD)
+            .first()
+        )
         if verification is None:
             return json_response(401, Text.VERIFICATION_FAILED)
         if not verification.is_valid:
