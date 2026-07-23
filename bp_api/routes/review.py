@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from flask import request
 from web import cdn
@@ -74,14 +75,14 @@ def post_reviews() -> Response:
             return json_response(409, HttpText.HTTP_409)
 
         # Upload photo when provided
-        request_file = request.files.get("photo")
-        if request_file is not None and request_file.filename:
-            _, extension = os.path.splitext(request_file.filename)
-            extension = extension.lstrip(".").lower()
-            if extension in config.CDN_IMAGE_EXTS:
-                filename = secure_filename(f"{token}-{sku_id}.{extension}")
-                path = os.path.join("review", str(token), filename)
-                cdn.upload(request_file, path)
+        file_ = request.files.get("photo")
+        if file_ is not None and file_.filename:
+            _, ext = os.path.splitext(file_.filename)
+            ext = ext.lstrip(".").lower()
+            if ext in config.CDN_IMAGE_EXTS:
+                fn = secure_filename(f"{order_line.sku.slug}-{uuid.uuid4().hex}.{ext}")
+                path = os.path.join("reviews", fn)
+                cdn.upload(file_, path)
                 photo_url = cdn.url(path)
 
         # Insert review
