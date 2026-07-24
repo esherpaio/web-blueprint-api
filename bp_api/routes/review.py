@@ -2,7 +2,6 @@ import base64
 import io
 import os
 import re
-import uuid
 
 from web import cdn
 from web.api import HttpText, json_get, json_response
@@ -36,22 +35,22 @@ _DATA_URL_RE = re.compile(
 #
 
 
-def upload_review_photo(slug: str, data_url: str) -> str | None:
+def upload_review_photo(review_id: int, slug: str, data_url: str) -> str | None:
     match = _DATA_URL_RE.match(data_url)
     if match is None:
         return None
     ext = match.group("ext").lower()
-    if ext == "jpeg":
-        ext = "jpg"
     if ext not in config.CDN_IMAGE_EXTS:
         return None
+
     try:
         content = base64.b64decode(match.group("data"), validate=True)
     except Exception:
         return None
     if not content or len(content) > MAX_PHOTO_BYTES:
         return None
-    path = os.path.join("reviews", f"{slug}-{uuid.uuid4().hex}.{ext}")
+
+    path = os.path.join("reviews", f"review-{slug}-{review_id}.{ext}")
     cdn.upload(io.BytesIO(content), path)
     return cdn.url(path)
 
@@ -86,23 +85,17 @@ def post_reviews() -> Response:
             return json_response(410, HttpText.HTTP_410)
         order_id = verification.data.get("order_id")
 
-        # Validate that the SKU belongs to the order
+        # Validate SKU to order
         order_line = (
             s.query(OrderLine).filter_by(order_id=order_id, sku_id=sku_id).first()
         )
         if order_line is None:
             return json_response(404, HttpText.HTTP_404)
 
-        # Prevent duplicate reviews for the same SKU
+        # Prevent duplicate reviews
         existing = s.query(Review).filter_by(order_id=order_id, sku_id=sku_id).first()
         if existing is not None:
             return json_response(409, HttpText.HTTP_409)
-
-        # Upload photo when provided as a base64 data URL
-        if photo:
-            uploaded = upload_review_photo(order_line.sku.slug, photo)
-            if uploaded is not None:
-                photo_url = uploaded
 
         # Insert review
         review = Review(
@@ -119,6 +112,14 @@ def post_reviews() -> Response:
             user_id=verification.user_id,
         )
         s.add(review)
+        s.flush()
+
+        # Upload photo
+        if photo:
+            upload_url = upload_review_photo(review.id, order_line.sku.slug, photo)
+            if upload_url is not None:
+                review.photo_url = upload_url
+                s.flush()
 
     return json_response()
 
