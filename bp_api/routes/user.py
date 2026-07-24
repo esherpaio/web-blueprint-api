@@ -42,6 +42,7 @@ class UserAPI(API):
         User.display_name,
         User.bulk_email,
         User.newsletter_email,
+        User.image_url,
     }
     get_filters = {
         User.email,
@@ -54,6 +55,7 @@ class UserAPI(API):
         User.bulk_email,
         User.newsletter_email,
         User.display_name,
+        User.image_url,
         "default_billing_id",
         "default_shipping_id",
     }
