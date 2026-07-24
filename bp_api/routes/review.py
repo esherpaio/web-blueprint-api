@@ -1,7 +1,9 @@
+import base64
+import io
 import os
+import re
 import uuid
 
-from flask import request
 from web import cdn
 from web.api import HttpText, json_get, json_response
 from web.auth import authorize
@@ -16,13 +18,42 @@ from web.database.model import (
 )
 from web.setup import config
 from werkzeug import Response
-from werkzeug.utils import secure_filename
 
 from bp_api import api_bp
 
 #
 # Configuration
 #
+
+MAX_PHOTO_BYTES = 100 * 1024 * 1024
+_DATA_URL_RE = re.compile(
+    r"data:image/(?P<ext>[\w.+-]+);base64,(?P<data>.+)", re.DOTALL
+)
+
+
+#
+# Functions
+#
+
+
+def upload_review_photo(slug: str, data_url: str) -> str | None:
+    match = _DATA_URL_RE.match(data_url)
+    if match is None:
+        return None
+    ext = match.group("ext").lower()
+    if ext == "jpeg":
+        ext = "jpg"
+    if ext not in config.CDN_IMAGE_EXTS:
+        return None
+    try:
+        content = base64.b64decode(match.group("data"), validate=True)
+    except Exception:
+        return None
+    if not content or len(content) > MAX_PHOTO_BYTES:
+        return None
+    path = os.path.join("reviews", f"{slug}-{uuid.uuid4().hex}.{ext}")
+    cdn.upload(io.BytesIO(content), path)
+    return cdn.url(path)
 
 
 #
@@ -32,14 +63,15 @@ from bp_api import api_bp
 
 @api_bp.post("/reviews")
 def post_reviews() -> Response:
-    token = json_get("token", str, nullable=False)
-    sku_id = json_get("sku_id", int, nullable=False)
-    rating = json_get("rating", int, nullable=False)
-    title = json_get("title", str)
-    body = json_get("body", str)
-    author_name = json_get("author_name", str)
-    photo_url = json_get("photo_url", str, default=None)
-    show_photo = json_get("show_photo", bool, default=False)
+    token, _ = json_get("token", str, nullable=False)
+    sku_id, _ = json_get("sku_id", int, nullable=False)
+    rating, _ = json_get("rating", int, nullable=False)
+    title, _ = json_get("title", str, nullable=False)
+    body, _ = json_get("body", str, nullable=False)
+    author_name, _ = json_get("author_name", str, nullable=False)
+    photo, _ = json_get("photo", str)
+    photo_url, _ = json_get("photo_url", str)
+    show_photo, _ = json_get("show_photo", bool, default=False)
 
     with conn.begin() as s:
         # Validate review token
@@ -66,16 +98,11 @@ def post_reviews() -> Response:
         if existing is not None:
             return json_response(409, HttpText.HTTP_409)
 
-        # Upload photo when provided
-        file_ = request.files.get("photo")
-        if file_ is not None and file_.filename:
-            _, ext = os.path.splitext(file_.filename)
-            ext = ext.lstrip(".").lower()
-            if ext in config.CDN_IMAGE_EXTS:
-                fn = secure_filename(f"{order_line.sku.slug}-{uuid.uuid4().hex}.{ext}")
-                path = os.path.join("reviews", fn)
-                cdn.upload(file_, path)
-                photo_url = cdn.url(path)
+        # Upload photo when provided as a base64 data URL
+        if photo:
+            uploaded = upload_review_photo(order_line.sku.slug, photo)
+            if uploaded is not None:
+                photo_url = uploaded
 
         # Insert review
         review = Review(
