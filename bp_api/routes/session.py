@@ -1,10 +1,13 @@
+import io
 import json
+import os
 import urllib.request
 from enum import StrEnum
 from typing import Callable
 
 from google.auth.transport import requests
 from google.oauth2 import id_token
+from web import cdn
 from web.api import json_get, json_response
 from web.auth import current_user, jwt_login, jwt_logout
 from web.database import conn
@@ -55,6 +58,20 @@ def transfer_cart(f: Callable) -> Callable[..., Response]:
 
     wrap.__name__ = f.__name__
     return wrap
+
+
+def upload_user_picture(user_id: int, url: str) -> str | None:
+    try:
+        request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(request) as response:
+            content_type = response.headers.get("Content-Type", "")
+            content = response.read()
+    except Exception:
+        return None
+    extension = "png" if "png" in content_type else "jpg"
+    path = os.path.join("user-pictures", f"{user_id}.{extension}")
+    cdn.upload(io.BytesIO(content), path)
+    return cdn.url(path)
 
 
 #
@@ -111,6 +128,7 @@ def post_sessions_google() -> Response:
         )
         display_name = data.get("given_name")
         email = data.get("email")
+        picture = data.get("picture")
     elif access_token:
         resp = urllib.request.Request(
             "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -120,6 +138,7 @@ def post_sessions_google() -> Response:
             data = json.loads(response.read().decode())
         display_name = data.get("given_name")
         email = data.get("email")
+        picture = data.get("picture")
     else:
         return json_response(400, Text.GOOGLE_INVALID)
 
@@ -128,20 +147,29 @@ def post_sessions_google() -> Response:
 
     # Get or add user
     with conn.begin() as s:
-        data = s.query(User).filter_by(email=email.lower()).first()
-        if data is not None and not data.is_active:
-            data.is_active = True
-        if data is not None and display_name:
-            data.display_name = display_name
-        if data is None:
-            data = User(
+        user = s.query(User).filter_by(email=email.lower()).first()
+        if user is None:
+            user = User(
                 display_name=display_name,
                 email=email,
                 is_active=True,
                 role_id=UserRoleId.USER,
             )
-            s.add(data)
+            s.add(user)
+        else:
+            if not user.is_active:
+                user.is_active = True
+            if display_name:
+                user.display_name = display_name
+        s.flush()
+
+    # Store the Google profile picture on our CDN
+    if picture and not user.image_url:
+        image_url = upload_user_picture(user.id, picture)
+        if image_url:
+            with conn.begin() as s:
+                s.query(User).filter_by(id=user.id).update({"image_url": image_url})
 
     # Login user
-    jwt_login(data.id)
+    jwt_login(user.id)
     return json_response()
