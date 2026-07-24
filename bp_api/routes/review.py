@@ -32,22 +32,14 @@ from bp_api import api_bp
 
 @api_bp.post("/reviews")
 def post_reviews() -> Response:
-    token = request.form.get("token")
-    sku_id_raw = request.form.get("sku_id")
-    rating_raw = request.form.get("rating")
-    title = request.form.get("title")
-    body = request.form.get("body")
-    author_name = request.form.get("author_name")
-    photo_url = request.form.get("photo_url")
-    show_photo = request.form.get("show_photo", "true").lower() == "true"
-
-    if not all([token, sku_id_raw, rating_raw, title, body, author_name]):
-        return json_response(400, HttpText.HTTP_400)
-    try:
-        sku_id = int(sku_id_raw)  # type: ignore[arg-type]
-        rating = int(rating_raw)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return json_response(400, HttpText.HTTP_400)
+    token = json_get("token", str, nullable=False)
+    sku_id = json_get("sku_id", int, nullable=False)
+    rating = json_get("rating", int, nullable=False)
+    title = json_get("title", str)
+    body = json_get("body", str)
+    author_name = json_get("author_name", str)
+    photo_url = json_get("photo_url", str, default=None)
+    show_photo = json_get("show_photo", bool, default=False)
 
     with conn.begin() as s:
         # Validate review token
