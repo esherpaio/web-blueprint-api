@@ -68,7 +68,6 @@ def post_reviews() -> Response:
     title, _ = json_get("title", str)
     body, _ = json_get("body", str)
     author_name, _ = json_get("author_name", str)
-    photo, _ = json_get("photo", str)
     photo_url, _ = json_get("photo_url", str)
     show_photo, _ = json_get("show_photo", bool, default=False)
 
@@ -113,13 +112,6 @@ def post_reviews() -> Response:
         )
         s.add(review)
         s.flush()
-
-        # Upload photo
-        if photo:
-            upload_url = upload_review_photo(review.id, order_line.sku.slug, photo)
-            if upload_url is not None:
-                review.photo_url = upload_url
-                s.flush()
 
     return json_response()
 
