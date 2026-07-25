@@ -96,6 +96,12 @@ def post_reviews() -> Response:
         if existing is not None:
             return json_response(409, HttpText.HTTP_409)
 
+        # Determine review status
+        if not title and not body and not author_name:
+            status_id = ReviewStatusId.APPROVED
+        else:
+            status_id = ReviewStatusId.PENDING
+
         # Insert review
         review = Review(
             author_name=author_name,
@@ -107,7 +113,7 @@ def post_reviews() -> Response:
             order_id=order_id,
             product_id=order_line.sku.product_id,
             sku_id=sku_id,
-            status_id=ReviewStatusId.PENDING,
+            status_id=status_id,
             user_id=verification.user_id,
         )
         s.add(review)
