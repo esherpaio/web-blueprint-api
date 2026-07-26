@@ -1,12 +1,13 @@
 import uuid
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 
 from flask import abort
 from sqlalchemy.orm import Session
 from web.api import HttpText, json_get, json_response
-from web.app.urls import parse_url, url_for
+from web.app.urls import url_for
 from web.database import conn
-from web.database.model import User, Verification
+from web.database.model import User, Verification, VerificationType
 from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
@@ -61,7 +62,11 @@ def patch_users_id_password(user_id: int) -> Response:
             return json_response(404, HttpText.HTTP_404)
 
         # Check verification
-        verification = s.query(Verification).filter_by(key=verification_key).first()
+        verification = (
+            s.query(Verification)
+            .filter_by(key=verification_key, type=VerificationType.PASSWORD)
+            .first()
+        )
         if verification is None:
             return json_response(401, Text.VERIFICATION_FAILED)
         if not verification.is_valid:
@@ -95,14 +100,20 @@ def recover_user_password(s: Session, data: dict, model: User) -> None:
 
     # Insert verification
     key = str(uuid.uuid4())
-    verification = Verification(user_id=model.id, key=key)
+    now = datetime.now(UTC)
+    verification = Verification(
+        user_id=model.id,
+        key=key,
+        type=VerificationType.PASSWORD,
+        valid_from=now,
+        expires_at=now + timedelta(days=1),
+    )
     s.add(verification)
     s.flush()
 
     # Send email
-    reset_url = parse_url(
+    reset_url = url_for(
         config.ENDPOINT_PASSWORD_RECOVERY,
-        _func=url_for,
         _external=True,
         verification_key=verification.key,
     )

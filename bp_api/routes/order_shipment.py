@@ -1,4 +1,5 @@
 from web.api import HttpText, json_get, json_response
+from web.api.utils.review import create_review_request
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Order, OrderStatusId, Shipment, UserRoleLevel
@@ -49,6 +50,9 @@ def post_orders_id_shipments(order_id: int) -> Response:
             shipping_email=order.shipping.email,
             shipping_address=order.shipping.full_address,
         )
+
+        # Request a review
+        create_review_request(s, order)
 
     return json_response()
 

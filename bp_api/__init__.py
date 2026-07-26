@@ -24,6 +24,7 @@ from .routes import (
     product_sku,
     product_value,
     region,
+    review,
     session,
     settings,
     shipment_class,
