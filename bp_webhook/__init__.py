@@ -1,7 +1,2 @@
-from web.setup import config
-
 from .blueprint import webhook_bp
 from .routes import mollie
-
-if config.INTIME_ENABLED:
-    from .routes import intime

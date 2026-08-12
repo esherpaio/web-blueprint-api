@@ -95,8 +95,6 @@ GOOGLE_PLACE_ID = None
 
 MOLLIE_API_KEY = None
 
-INTIME_ENABLED = False
-
 #
 # Structured data
 #
