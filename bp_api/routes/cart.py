@@ -5,7 +5,7 @@ from flask import abort
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm.util import has_identity
 from web.api import API, HttpText, json_response
-from web.api.utils.cart import get_shipment_methods
+from web.api.utils.cart import get_shipment_methods_by_cart
 from web.api.utils.vat import get_vat
 from web.auth import current_user
 from web.database import conn
@@ -175,7 +175,7 @@ def set_shipment(s: Session, data: dict, model: Cart) -> None:
     else:
         shipment_method_id = None
 
-    shipment_methods = get_shipment_methods(s, model)
+    shipment_methods = get_shipment_methods_by_cart(s, model)
     if shipment_method_id is not None:
         shipment_method = next(
             (

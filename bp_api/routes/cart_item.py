@@ -3,7 +3,7 @@ from enum import StrEnum
 from flask import abort
 from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
-from web.api.utils.cart import get_shipment_methods
+from web.api.utils.cart import get_shipment_methods_by_cart
 from web.auth import current_user
 from web.database import conn
 from web.database.model import Cart, CartItem, Coupon
@@ -133,7 +133,7 @@ def set_cart(s: Session, data: dict, model: None) -> None:
             )
             if coupon is not None:
                 cart.coupon_id = coupon.id
-        shipment_methods = get_shipment_methods(s, cart)
+        shipment_methods = get_shipment_methods_by_cart(s, cart)
         if shipment_methods:
             shipment_method = min(shipment_methods, key=none_attrgetter("unit_price"))
             cart.shipment_method_id = shipment_method.id

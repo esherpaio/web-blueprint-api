@@ -4,7 +4,7 @@ from flask import abort, g
 from pyvat import is_vat_number_format_valid
 from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
-from web.api.utils.cart import get_shipment_methods
+from web.api.utils.cart import get_shipment_methods_by_cart
 from web.api.utils.mollie import Mollie
 from web.auth import authorize, current_user
 from web.database import conn
@@ -126,7 +126,7 @@ def val_status(s: Session, data: dict, model: Order) -> None:
 def val_cart(s: Session, data: dict, model: Order) -> None:
     cart = g.cart
     # Check shipment method
-    shipment_methods = get_shipment_methods(s, cart)
+    shipment_methods = get_shipment_methods_by_cart(s, cart)
     if shipment_methods:
         if cart.shipment_method_id is None:
             abort(json_response(400, Text.SHIPMENT_METHOD_REQUIRED))

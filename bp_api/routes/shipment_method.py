@@ -1,20 +1,11 @@
 from decimal import Decimal
 
-from sqlalchemy import false, or_
 from sqlalchemy.orm import Session, joinedload
 from web.api import API, HttpText, json_get, json_response
+from web.api.utils.cart import get_shipment_methods_by_cart
 from web.auth import authorize, current_user
 from web.database import conn
-from web.database.model import (
-    Cart,
-    CartItem,
-    ShipmentClass,
-    ShipmentMethod,
-    ShipmentZone,
-    Sku,
-    UserRoleLevel,
-)
-from web.locale import current_locale
+from web.database.model import Cart, CartItem, ShipmentMethod, Sku, UserRoleLevel
 from werkzeug import Response
 
 from bp_api import api_bp
@@ -72,7 +63,7 @@ def get_shipment_methods() -> Response:
     api = ShipmentMethodAPI()
     data = api.gen_query_data(api.get_filters)
     with conn.begin() as s:
-        models = set_shipment_methods(s, data, [])
+        models = _get_shipment_methods(s, data, [])
         resources = api.gen_resources(s, models)
     return json_response(data=resources)
 
@@ -134,7 +125,7 @@ def delete_shipment_methods_id(shipment_method_id: int) -> Response:
 #
 
 
-def set_shipment_methods(
+def _get_shipment_methods(
     s: Session,
     data: dict,
     model: list[ShipmentMethod],
@@ -155,60 +146,4 @@ def set_shipment_methods(
     )
     if cart is None:
         return []
-
-    # Get all possible shipment class ids
-    shipment_class_ids = []
-    for item in cart.items:
-        shipment_class_id = item.sku.product.shipment_class_id
-        if shipment_class_id is not None:
-            shipment_class_ids.append(shipment_class_id)
-
-    # Determine the shipment class
-    shipment_class = (
-        s.query(ShipmentClass)
-        .filter(
-            ShipmentClass.id.in_(shipment_class_ids),
-            ShipmentClass.is_deleted == false(),
-        )
-        .order_by(ShipmentClass.order)
-        .first()
-    )
-
-    # Get country_id and region_id
-    if cart.shipping:
-        country_id = cart.shipping.country_id
-        region_id = cart.shipping.country.region_id
-    else:
-        # NOTE(Stan): Not sure if we should do this
-        country_id = current_locale.country.id
-        region_id = current_locale.country.region_id
-
-    # Determine the shipment zone
-    shipment_zone = (
-        s.query(ShipmentZone)
-        .filter(
-            or_(
-                ShipmentZone.country_id == country_id,
-                ShipmentZone.region_id == region_id,
-            ),
-            ShipmentZone.is_deleted == false(),
-        )
-        .order_by(ShipmentZone.order)
-        .first()
-    )
-
-    # Get shipment methods
-    if shipment_zone and shipment_class:
-        shipment_methods = (
-            s.query(ShipmentMethod)
-            .filter_by(
-                class_id=shipment_class.id,
-                zone_id=shipment_zone.id,
-                is_deleted=False,
-            )
-            .order_by(ShipmentMethod.unit_price)
-            .all()
-        )
-    else:
-        shipment_methods = []
-    return shipment_methods
+    return get_shipment_methods_by_cart(s, cart)
