@@ -76,6 +76,7 @@ SMTP_PASSWORD = env_var("SMTP_PASSWORD", str)
 #
 
 CDN_BASE_URL = env_var("CDN_BASE_URL", str)
+CDN_LOCAL = False
 CDN_AUTO_NAMING = False
 CDN_IMAGE_EXTS = ["jpg", "jpeg", "png", "webp"]
 CDN_AUDIO_EXTS = ["m4a", "mp3", "mp4"]

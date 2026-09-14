@@ -7,9 +7,9 @@ from typing import Callable
 
 from google.auth.transport import requests
 from google.oauth2 import id_token
-from web import cdn
 from web.api import json_get, json_response
 from web.auth import current_user, jwt_login, jwt_logout
+from web.cdn import Client, cdn_url
 from web.database import conn
 from web.database.model import Cart, User, UserRoleId
 from web.i18n import _
@@ -70,8 +70,9 @@ def upload_user_picture(user_id: int, url: str) -> str | None:
         return None
     extension = "png" if "png" in content_type else "jpg"
     path = os.path.join("user-pictures", f"{user_id}.{extension}")
-    cdn.upload(io.BytesIO(content), path)
-    return cdn.url(path)
+    with Client.connect() as c:
+        c.upload(io.BytesIO(content), path)
+    return cdn_url(path)
 
 
 #

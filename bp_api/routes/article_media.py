@@ -2,9 +2,9 @@ import os
 import re
 
 from flask import request
-from web import cdn
 from web.api import HttpText, json_get, json_response
 from web.auth import authorize
+from web.cdn import Client
 from web.database import conn
 from web.database.model import Article, ArticleMedia, File, FileTypeId, UserRoleLevel
 from web.setup import config
@@ -46,39 +46,40 @@ def post_articles_id_media(article_id: int) -> Response:
                 if match is not None:
                     sequence = int(match.group(1))
 
-        for request_file in request.files.getlist("file"):
-            # Increment sequence
-            sequence += 1
+        with Client.connect() as c:
+            for request_file in request.files.getlist("file"):
+                # Increment sequence
+                sequence += 1
 
-            # Create details
-            if request_file.filename is None:
-                continue
-            name, extension = os.path.splitext(request_file.filename)
-            if config.CDN_AUTO_NAMING:
-                name = f"{article.slug}-{sequence}"
-            else:
-                name = secure_filename(name)
-            extension = extension.lstrip(".").lower()
-            filename = f"{name}.{extension}"
-            path = os.path.join("article", article.slug, filename)
+                # Create details
+                if request_file.filename is None:
+                    continue
+                name, extension = os.path.splitext(request_file.filename)
+                if config.CDN_AUTO_NAMING:
+                    name = f"{article.slug}-{sequence}"
+                else:
+                    name = secure_filename(name)
+                extension = extension.lstrip(".").lower()
+                filename = f"{name}.{extension}"
+                path = os.path.join("article", article.slug, filename)
 
-            # Get media type
-            if extension in config.CDN_IMAGE_EXTS:
-                type_id = FileTypeId.IMAGE
-            elif extension in config.CDN_VIDEO_EXTS:
-                type_id = FileTypeId.VIDEO
-            else:
-                continue
+                # Get media type
+                if extension in config.CDN_IMAGE_EXTS:
+                    type_id = FileTypeId.IMAGE
+                elif extension in config.CDN_VIDEO_EXTS:
+                    type_id = FileTypeId.VIDEO
+                else:
+                    continue
 
-            # Upload media
-            cdn.upload(request_file, path)
+                # Upload media
+                c.upload(request_file, path)
 
-            # Insert file and article media
-            file_ = File(path=path, type_id=type_id)
-            s.add(file_)
-            s.flush()
-            article_media = ArticleMedia(article_id=article_id, file_id=file_.id)
-            s.add(article_media)
+                # Insert file and article media
+                file_ = File(path=path, type_id=type_id)
+                s.add(file_)
+                s.flush()
+                article_media = ArticleMedia(article_id=article_id, file_id=file_.id)
+                s.add(article_media)
 
     return json_response()
 
@@ -124,7 +125,8 @@ def delete_articles_id_media_id(article_id: int, media_id: int) -> Response:
             return json_response(404, HttpText.HTTP_404)
 
         # Delete file from CDN
-        cdn.delete(file_.path)
+        with Client.connect() as c:
+            c.delete(file_.path)
 
         # Delete article media and file
         s.delete(file_)

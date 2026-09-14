@@ -3,9 +3,9 @@ import io
 import os
 import re
 
-from web import cdn
 from web.api import HttpText, json_get, json_response
 from web.auth import authorize
+from web.cdn import Client, cdn_url
 from web.database import conn
 from web.database.model import (
     OrderLine,
@@ -51,8 +51,9 @@ def upload_review_photo(review_id: int, slug: str, data_url: str) -> str | None:
         return None
 
     path = os.path.join("reviews", f"review-{slug}-{review_id}.{ext}")
-    cdn.upload(io.BytesIO(content), path)
-    return cdn.url(path)
+    with Client.connect() as c:
+        c.upload(io.BytesIO(content), path)
+    return cdn_url(path)
 
 
 #
