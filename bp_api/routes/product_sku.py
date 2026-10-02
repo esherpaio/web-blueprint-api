@@ -27,7 +27,7 @@ def post_skus(product_id: int) -> Response:
     with conn.begin() as s:
         # Get product and skus
         skus = s.query(Sku).filter_by(product_id=product_id).all()
-        product = s.query(Product).filter_by(id=product_id).first()
+        product = s.query(Product).filter_by(id=product_id, is_deleted=False).first()
         if product is None:
             return json_response(404, HttpText.HTTP_404)
 

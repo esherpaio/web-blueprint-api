@@ -6,6 +6,7 @@ from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
 from web.api.utils.cart import get_shipment_methods_by_cart
 from web.api.utils.mollie import Mollie
+from web.api.utils.sku import val_sku
 from web.auth import authorize, current_user
 from web.database import conn
 from web.database.model import (
@@ -125,6 +126,8 @@ def val_status(s: Session, data: dict, model: Order) -> None:
 
 def val_cart(s: Session, data: dict, model: Order) -> None:
     cart = g.cart
+    for item in cart.items:
+        val_sku(item.sku)
     # Check shipment method
     shipment_methods = get_shipment_methods_by_cart(s, cart)
     if shipment_methods:

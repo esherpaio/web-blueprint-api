@@ -1,12 +1,14 @@
 from enum import StrEnum
 
 from flask import abort
+from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.session import Session
 from web.api import API, HttpText, json_response
 from web.api.utils.cart import get_shipment_methods_by_cart
+from web.api.utils.sku import val_sku
 from web.auth import current_user
 from web.database import conn
-from web.database.model import Cart, CartItem, Coupon
+from web.database.model import Cart, CartItem, Coupon, Sku
 from web.i18n import _
 from web.utils import none_attrgetter
 from werkzeug import Response
@@ -111,6 +113,8 @@ def upsert_cart_item(s: Session, data: dict, model: None) -> CartItem:
     if cart is None:
         abort(json_response(404, HttpText.HTTP_404))
     else:
+        sku = s.query(Sku).options(joinedload(Sku.product)).filter_by(id=sku_id).first()
+        val_sku(sku)
         for cart_item in cart.items:
             if cart_item.sku_id == sku_id:
                 cart_item.quantity += quantity
@@ -145,6 +149,7 @@ def set_cart(s: Session, data: dict, model: None) -> None:
 
 
 def val_cart_item(s: Session, data: dict, model: CartItem) -> None:
+    val_sku(model.sku)
     if "quantity" in data and data["quantity"] <= 0:
         abort(json_response(400, Text.CART_ITEM_QUANTITY_ZERO))
 
