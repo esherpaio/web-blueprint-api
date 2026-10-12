@@ -1,13 +1,16 @@
-from flask import send_file
+from io import BytesIO
+
+from flask import abort, send_file
+from fpdf.image_datastructures import ImageCache
+from sqlalchemy.orm import Session
 from web.api import HttpText, json_response
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Order, UserRoleLevel
-from web.document import get_pdf_path
 from web.document.object import gen_invoice_pdf
 from web.i18n import _
-from web.utils import remove_file
 from werkzeug import Response
+from werkzeug.utils import secure_filename
 
 from bp_api import api_bp
 
@@ -20,13 +23,33 @@ from bp_api import api_bp
 @authorize(UserRoleLevel.ADMIN)
 def get_orders_id_invoices_id_pdf(order_id: int, invoice_id: int) -> Response:
     with conn.begin() as s:
-        order = s.query(Order).filter_by(id=order_id).first()
-        if not order or not order.invoice or order.invoice.id != invoice_id:
-            return json_response(404, HttpText.HTTP_404)
-        invoice = order.invoice
-        pdf = gen_invoice_pdf(s, order, invoice)
-        pdf_name = _("PDF_INVOICE_FILENAME", invoice_number=invoice.number)
-        pdf_path = get_pdf_path(pdf_name)
-        pdf.output(pdf_path)
-    remove_file(pdf_path, delay_s=20)
-    return send_file(pdf_path, as_attachment=True, download_name=pdf_name)
+        content, filename = get_invoice_pdf(s, order_id, invoice_id)
+    response = send_file(
+        BytesIO(content),
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=filename,
+    )
+    response.headers["Cache-Control"] = "private, no-store"
+    return response
+
+
+#
+# Functions
+#
+
+
+def get_invoice_pdf(
+    s: Session,
+    order_id: int,
+    invoice_id: int,
+    *,
+    image_cache: ImageCache | None = None,
+) -> tuple[bytes, str]:
+    order = s.get(Order, order_id)
+    if not order or not order.invoice or order.invoice.id != invoice_id:
+        abort(json_response(404, HttpText.HTTP_404))
+    invoice = order.invoice
+    pdf = gen_invoice_pdf(s, order, invoice, image_cache=image_cache)
+    filename = secure_filename(_("PDF_INVOICE_FILENAME", invoice_number=invoice.number))
+    return bytes(pdf.output()), filename

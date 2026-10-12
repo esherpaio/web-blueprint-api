@@ -1,19 +1,21 @@
 from decimal import Decimal
 from enum import StrEnum
+from io import BytesIO
 
-from flask import send_file
+from flask import abort, send_file
+from fpdf.image_datastructures import ImageCache
+from sqlalchemy.orm import Session
 from web.api import HttpText, json_get, json_response
 from web.api.utils.mollie import Mollie
 from web.auth import authorize
 from web.database import conn
 from web.database.model import Order, Refund, UserRoleLevel
-from web.document import get_pdf_path
 from web.document.object import gen_refund_pdf
 from web.i18n import _
 from web.mail import mail
 from web.mail.enum import MailEvent
-from web.utils import remove_file
 from werkzeug import Response
+from werkzeug.utils import secure_filename
 
 from bp_api import api_bp
 
@@ -93,19 +95,33 @@ def post_orders_id_refund(order_id: int) -> Response:
 @authorize(UserRoleLevel.ADMIN)
 def get_orders_id_refunds_id_pdf(order_id: int, refund_id: int) -> Response:
     with conn.begin() as s:
-        order = s.query(Order).filter_by(id=order_id).first()
-        refund = s.query(Refund).filter_by(id=refund_id).first()
-        if not order or not order.invoice or not refund or refund.order_id != order_id:
-            return json_response(404, HttpText.HTTP_404)
-        invoice = order.invoice
-        pdf = gen_refund_pdf(s, order, invoice, refund)
-        pdf_name = _("PDF_REFUND_FILENAME", refund_number=refund.number)
-        pdf_path = get_pdf_path(pdf_name)
-        pdf.output(pdf_path)
-    remove_file(pdf_path, delay_s=20)
-    return send_file(pdf_path, as_attachment=True, download_name=pdf_name)
+        content, filename = get_refund_pdf(s, order_id, refund_id)
+    response = send_file(
+        BytesIO(content),
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=filename,
+    )
+    response.headers["Cache-Control"] = "private, no-store"
+    return response
 
 
 #
 # Functions
 #
+
+
+def get_refund_pdf(
+    s: Session,
+    order_id: int,
+    refund_id: int,
+    *,
+    image_cache: ImageCache | None = None,
+) -> tuple[bytes, str]:
+    order = s.get(Order, order_id)
+    refund = s.get(Refund, refund_id)
+    if not order or not order.invoice or not refund or refund.order_id != order_id:
+        abort(json_response(404, HttpText.HTTP_404))
+    pdf = gen_refund_pdf(s, order, order.invoice, refund, image_cache=image_cache)
+    filename = secure_filename(_("PDF_REFUND_FILENAME", refund_number=refund.number))
+    return bytes(pdf.output()), filename

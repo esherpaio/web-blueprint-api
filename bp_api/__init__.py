@@ -17,6 +17,7 @@ from .routes import (
     order_payment,
     order_refund,
     order_shipment,
+    order_zip,
     product,
     product_link,
     product_media,
