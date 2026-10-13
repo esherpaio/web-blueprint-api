@@ -17,7 +17,7 @@ DATABASE_MODULE = None
 WORKER_ENABLED = False
 WORKER_INTERVAL_S = 300
 
-DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/web_test"
+DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/web_api"
 LOCALHOST_URL = None
 
 ENDPOINT_HOME = None
