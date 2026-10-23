@@ -1,1 +1,2 @@
 git+https://github.com/esherpaio/web-framework.git
+google-auth[requests]==2.62.0
