@@ -4,14 +4,12 @@ import os
 import re
 
 from web.api import HttpText, json_get, json_response
-from web.auth import authorize
 from web.cdn import Client, cdn_url
 from web.database import conn
 from web.database.model import (
     OrderLine,
     Review,
     ReviewStatusId,
-    UserRoleLevel,
     Verification,
     VerificationType,
 )
@@ -119,20 +117,5 @@ def post_reviews() -> Response:
         )
         s.add(review)
         s.flush()
-
-    return json_response()
-
-
-@api_bp.patch("/reviews/<int:review_id>")
-@authorize(UserRoleLevel.ADMIN)
-def patch_reviews_id(review_id: int) -> Response:
-    status_id, has_status_id = json_get("status_id", str)
-
-    with conn.begin() as s:
-        review = s.query(Review).filter_by(id=review_id).first()
-        if not review:
-            return json_response(404, HttpText.HTTP_404)
-        if has_status_id:
-            review.status_id = status_id
 
     return json_response()

@@ -1,7 +1,6 @@
 from web.api import API, json_response
-from web.auth import authorize
 from web.database import conn
-from web.database.model import Currency, UserRoleLevel
+from web.database.model import Currency
 from werkzeug import Response
 
 from bp_api import api_bp
@@ -13,11 +12,6 @@ from bp_api import api_bp
 
 class CurrencyAPI(API):
     model = Currency
-    post_columns = {
-        Currency.code,
-        Currency.rate,
-        Currency.symbol,
-    }
     get_columns = {
         Currency.code,
         Currency.rate,
@@ -29,18 +23,6 @@ class CurrencyAPI(API):
 #
 # Endpoints
 #
-
-
-@api_bp.post("/currencies")
-@authorize(UserRoleLevel.ADMIN)
-def post_currencies() -> Response:
-    api = CurrencyAPI()
-    data = api.gen_data(api.post_columns)
-    with conn.begin() as s:
-        model = api.model()
-        api.insert(s, data, model)
-        resource = api.gen_resource(s, model)
-    return json_response(data=resource)
 
 
 @api_bp.get("/currencies")
@@ -59,16 +41,6 @@ def get_currencies_id(currency_id: int) -> Response:
         model: Currency = api.get(s, currency_id)
         resource = api.gen_resource(s, model)
     return json_response(data=resource)
-
-
-@api_bp.delete("/currencies/<int:currency_id>")
-@authorize(UserRoleLevel.ADMIN)
-def delete_currencies_id(currency_id: int) -> Response:
-    api = CurrencyAPI()
-    with conn.begin() as s:
-        model: Currency = api.get(s, currency_id)
-        api.delete(s, model)
-    return json_response()
 
 
 #
