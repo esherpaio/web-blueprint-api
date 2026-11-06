@@ -51,7 +51,8 @@ def mollie_payment() -> Response:
                 invoice.paid_at = mollie_payment_.paid_at
                 s.flush()
 
-            if order.status_id != OrderStatusId.PAID:
+            # Mollie also calls this webhook for refunds and chargebacks
+            if order.status_id == OrderStatusId.PENDING:
                 order.status_id = OrderStatusId.PAID
                 s.flush()
                 mail.trigger_events(
