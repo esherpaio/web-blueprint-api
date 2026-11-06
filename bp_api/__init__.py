@@ -14,7 +14,6 @@ from .routes import (
     order_shipment,
     order_zip,
     product_sku,
-    region,
     review,
     session,
     settings,

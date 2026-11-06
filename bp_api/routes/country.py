@@ -19,7 +19,6 @@ class CountryAPI(API):
         Country.id,
         Country.allows_shipping,
         Country.currency_id,
-        Country.region_id,
     }
 
 

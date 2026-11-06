@@ -149,7 +149,10 @@ def val_cart(s: Session, data: dict, model: Order) -> None:
     # Check VAT number
     if cart.billing.vat is not None:
         vat_parsed = "".join(x for x in cart.billing.vat if x.isalnum())
-        is_valid = is_vat_number_format_valid(vat_parsed, cart.billing.country.code)
+        is_valid = is_vat_number_format_valid(
+            vat_parsed,
+            cart.billing.country.code,
+        )
         if not is_valid:
             abort(json_response(400, Text.VAT_INVALID))
     # Check state
