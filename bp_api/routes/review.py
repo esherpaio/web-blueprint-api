@@ -1,10 +1,4 @@
-import base64
-import io
-import os
-import re
-
 from web.api import HttpText, json_get, json_response
-from web.cdn import Client, cdn_url
 from web.database import conn
 from web.database.model import (
     OrderLine,
@@ -13,46 +7,9 @@ from web.database.model import (
     Verification,
     VerificationType,
 )
-from web.setup import config
 from werkzeug import Response
 
 from bp_api import api_bp
-
-#
-# Configuration
-#
-
-MAX_PHOTO_BYTES = 100 * 1024 * 1024
-_DATA_URL_RE = re.compile(
-    r"data:image/(?P<ext>[\w.+-]+);base64,(?P<data>.+)", re.DOTALL
-)
-
-
-#
-# Functions
-#
-
-
-def upload_review_photo(review_id: int, slug: str, data_url: str) -> str | None:
-    match = _DATA_URL_RE.match(data_url)
-    if match is None:
-        return None
-    ext = match.group("ext").lower()
-    if ext not in config.CDN_IMAGE_EXTS:
-        return None
-
-    try:
-        content = base64.b64decode(match.group("data"), validate=True)
-    except Exception:
-        return None
-    if not content or len(content) > MAX_PHOTO_BYTES:
-        return None
-
-    path = os.path.join("reviews", f"review-{slug}-{review_id}.{ext}")
-    with Client.connect() as c:
-        c.upload(io.BytesIO(content), path)
-    return cdn_url(path)
-
 
 #
 # Endpoints
